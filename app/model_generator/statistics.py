@@ -1,7 +1,9 @@
 import numpy as np
 import scipy.stats
 
-cochrain_critical_values = np.genfromtxt('cochrain_values.csv', delimiter=',')
+
+cochrain_critical_values = np.genfromtxt('./app/model_generator/cochrain_values.csv', delimiter=',')
+# cochrain_critical_values = np.genfromtxt('cochrain_values.csv', delimiter=',')
 cochrain_K = [2,3,4,5]
 cochrain_N = [2,3,4,5,6,7,8,9,10,12,15,20,24,30]
 
