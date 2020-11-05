@@ -1,5 +1,5 @@
-cochrain_enumerators = [1,2,3,4]
-cochrain_denominators = [2,4,6,8,10,12,15,20,24,30,40]
+enumerators = [1,2,3,4]
+denominators = [2,4,6,8,10,12,15,20,24,30,40]
 
 cochrain_01 = [
     [0.999, 0.995, 0.979, 0.959],

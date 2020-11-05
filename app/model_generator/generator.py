@@ -1,12 +1,13 @@
 import numpy as np
-import scipy.stats
-from statistics import *
 import statistical_tests
+
+np.set_printoptions(suppress=True)
 
 class FullFactorModel:
     def __init__(self, count_of_parallel_experiments, count_of_factors):
         self.count_of_factors = count_of_factors
         self.count_of_points = 2**count_of_factors
+        self.additional_experiment_experiment_conducted = False
         # points = np.ones((2**count_of_factors, count_of_factors))
         
         # TODO центрирование и нормирование 
@@ -63,11 +64,13 @@ class FullFactorModel:
         return np.abs(self.prac_b_coef)/np.sqrt(self.var_params_of_model)
 
     def fisher_value(self):
-        df_adequacy = self.count_of_points - self.significant_coef.sum()
+        df_adequacy = self.count_of_points - self.significant_coef.sum() \
+            + self.additional_experiment_experiment_conducted
 
         if df_adequacy == 0:
             if self.y_vals.shape[0] == self.count_of_points:
                 self.additional_experiment()
+                self.additional_experiment_experiment_conducted = True
             self.adequacy_var = self.count_of_parallel_experiments * (self.y_vals[-1].mean() - self.prac_b_coef[0])**2
         else:
             mean, _ = self.points_mean_var()
@@ -80,19 +83,26 @@ class FullFactorModel:
             Проверка воспроизводимости
             Тест Кохрена
         """
+        print('--------------------------------------------------------------')
         # Среднее и дисперсия
         mean, var = self.points_mean_var()
         self.reproducibility_var = var.mean()
         # Тест Кохрена
-        is_reproducible = statistical_tests.cochrain_test(
+        df_numerator = self.count_of_parallel_experiments - 1
+        df_denominator = self.count_of_points
+        reproducible_success, reproducible_result = statistical_tests.cochrain_test(
             self.cochran_value(var), 
-            self.count_of_parallel_experiments,
-            self.count_of_points
+            df_numerator,
+            df_denominator,
+            0.01
         )
+        if reproducible_success:
+            print('Эксперимент{} воспроизводим'.format('' if reproducible_result else ' не'))
             
-        print('Дисперсия ошибки (воспроизводимости эксперимента):', round(self.reproducibility_var,4))
+        print('Дисперсия ошибки (воспроизводимости) эксперимента:', round(self.reproducibility_var,4))
     
     def get_estimate_parameters(self):
+        'Вычисление параметорв модели'
         mean, var = self.points_mean_var()
         self.prac_b_coef = self.model_coef @ mean / self.count_of_points
         self.var_params_of_model = self.reproducibility_var \
@@ -100,15 +110,14 @@ class FullFactorModel:
         print('Дисперсия параметра модели:', np.round(self.var_params_of_model,4))
 
     def remove_insignificant_coefs(self):
+        'Удаление незначимых коэффициентов'
         self.significant_b_coef = self.prac_b_coef[self.significant_coef]
         self.significant_points = self.model_coef[:, self.significant_coef]
-        print('Значимые коэффициенты:', self.significant_b_coef)
-        # print(self.significant_b_coef)
-    
-# 225.74600
-# 226.96600
+        print('Значимые коэффициенты:', np.round(self.significant_b_coef,3))
 
     def update_model_response(self):
+        'Обновление отклика модели после удаления незначимых коэффициентов'
+        
         self.model_response = self.significant_points@self.significant_b_coef
         old_res = self.model_coef@self.prac_b_coef
         mean, var = self.points_mean_var()
@@ -123,37 +132,40 @@ class FullFactorModel:
         """
             Значимость оценок параметров. Критерий Стьюдента
         """
+        print('--------------------------------------------------------------')
         self.get_estimate_parameters()
-        # Наблюдаемое значение критерия Стьюдента =
-        # асболютное значение коэф. / корень из дисперсии параметра модели var_params_of_model
+        df = self.count_of_points * (self.count_of_parallel_experiments - 1)
         prac_student_test = self.student_values()
         student_test_success, student_test_result = statistical_tests.student_test(
-            prac_student_test,
-            self.count_of_parallel_experiments,
-            self.count_of_points
+            prac_student_test, df, 0.01
         )
 
         if student_test_success:
             self.significant_coef = student_test_result
             if np.logical_not(self.significant_coef).any():
-                print('Есть незначимые коэффициенты. Надо удалить')
+                print('Есть незначимые коэффициенты.')
                 #ASK перерасчет при необходимости (?)
                 self.remove_insignificant_coefs()
                 self.update_model_response()
             else:
                 print('Все коэффициенты значимы')
 
-    
-
     def adequacy_check(self):
+        print('--------------------------------------------------------------')
         """
             Адекватность. Критерий Фишера.
         """
         self.prac_fisher_test = self.fisher_value()
-        print('Дисперсия адекватности:', self.adequacy_var)
+        print('Дисперсия адекватности:', round(self.adequacy_var,3))
 
-        df_adequacy = self.count_of_points - self.significant_coef.sum()
-        fisher_test_success, fisher_test_result = statistical_tests.fisher_test(self.prac_fisher_test, df_adequacy)
+        df_enumerator = self.count_of_points - self.significant_coef.sum()\
+             + self.additional_experiment_experiment_conducted
+        df_denominator = self.count_of_points * (self.count_of_parallel_experiments - 1)
+        fisher_test_success, fisher_test_result = \
+            statistical_tests.fisher_test(self.prac_fisher_test, df_enumerator, df_denominator, 0.01)
+
+        if fisher_test_success:
+            print('Модель{} адекватна'.format('' if fisher_test_result else ' не'))
 
 
 if __name__ == '__main__':
@@ -166,4 +178,3 @@ if __name__ == '__main__':
     f.reproducibility_check()
     f.significance_estimate_parameters()
     f.adequacy_check()
-

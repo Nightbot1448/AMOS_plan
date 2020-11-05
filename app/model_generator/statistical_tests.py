@@ -1,40 +1,36 @@
 import numpy as np
-# from statistics import *
-import critical_stat_values
+from critical_stat_values import cochrain, student, fisher
 
-def cochrain_test(prac_cochrain, count_of_parallel_experiments, count_of_points):
+def cochrain_test(prac_cochrain, df_numerator, df_denominator, p_value=0.01):
     print('Оценка воспроизводимости критерием Кохрена')
-    prac_cochrain_crit = None
-    numerator_val_cochran = count_of_parallel_experiments - 1
-    denominator_val_cochran = count_of_points
-    K_cochrain_index, N_cochrain_index = None, None
+    enumerator_idx, denominator_idx = None, None
     try:
-        K_cochrain_index = cochrain_K.index(numerator_val_cochran)
-        N_cochrain_index = cochrain_N.index(denominator_val_cochran)
+        enumerator_idx = cochrain.enumerators.index(df_numerator)
+        denominator_idx = cochrain.denominators.index(df_denominator)
     except ValueError as ex:
         print(ex)
-    if K_cochrain_index is not None and N_cochrain_index is not None:
-        prac_cochrain_crit = cochrain_critical_values[N_cochrain_index][K_cochrain_index]
+    if enumerator_idx is not None and denominator_idx is not None:
+        cochrain_crit = (
+            cochrain.cochrain_05 if p_value == 0.05 \
+                else cochrain.cochrain_01)[denominator_idx][enumerator_idx]
         print('Наблюдаемое значение: ', round(prac_cochrain, 3))
-        print('Критическое значение: ', round(prac_cochrain_crit, 3))
-        if (prac_cochrain < prac_cochrain_crit):
-            return True
+        print('Критическое значение: ', round(cochrain_crit, 3))
+        return True, prac_cochrain < cochrain_crit
     else:
         print('Не удалось найти значение в таблице')
-    return False
+    return False, None
 
-def student_test(prac_student_values, count_of_parallel_experiments, count_of_points):
+def student_test(prac_student_values, df, p_value=0.01):
     print('Проверка значимости оценок параметров критерием Стьдента')
-    
-    student_df = count_of_points * (count_of_parallel_experiments - 1)
-    crit_t_value_idx = None
+    df_idx = None
     try:
-        crit_t_value_idx = t_df.index(student_df)
+        df_idx = student.df.index(df)
     except ValueError as ex:
         print(ex)
-    if crit_t_value_idx is not None:
+    if df_idx is not None:
+        crit_t_value = (student.students_05 if p_value == 0.05 \
+                else student.students_01)[df_idx]
         # > критерия == значимые
-        crit_t_value = t_values_01[crit_t_value_idx]
         print('Наблюдаемые значения:', np.round(prac_student_values, 3))
         print('Критическое значение:', round(crit_t_value, 3))
         return True, prac_student_values > crit_t_value
@@ -42,21 +38,20 @@ def student_test(prac_student_values, count_of_parallel_experiments, count_of_po
         print('Не удалось найти значение в таблице')
     return False, None
 
-def fisher_test(prac_fisher_value, df_fisher):
+def fisher_test(prac_fisher_value, df_enumerator, df_denominator, p_value=0.01):
     print('Проверка адекватности критерием Фишера')
-    print('Наблюдаемые значения:', round(prac_fisher_value, 3))
-    
-    # TODO доделать тест Фишера (нет таблицы критических значений)
-    return None, None
-    # try:
-    #     crit_f_value_idx = f_df.index(student_df) # get fisher crit value idx
-    # except ValueError as ex:
-    #     print(ex)
-    # if crit_t_value_idx is not None:
-    #     # > критерия == значимые
-    #     crit_f_value = f_values_01[crit_t_value_idx] get fisher crit value
-    #     print('Критическое значение:', round(crit_f_value,3))
-    #     return True, prac_fisher_value > crit_f_value
-    # else:
-    #     print('Не удалось найти значение в таблице')
-    # return False, None
+    enumerator_idx, denominator_idx = None, None
+    try:
+        enumerator_idx = fisher.enumerators.index(df_enumerator)
+        denominator_idx = fisher.denominators.index(df_denominator)
+    except ValueError as ex:
+        print(ex)
+    if enumerator_idx is not None and denominator_idx is not None:
+        crit_f_value = (fisher.fisher_05 if p_value == 0.05 \
+                else fisher.fisher_01)[denominator_idx][enumerator_idx]
+        print('Наблюдаемые значения:', round(prac_fisher_value, 3))
+        print('Критическое значение:', round(crit_f_value,3))
+        return True, prac_fisher_value < crit_f_value
+    else:
+        print('Не удалось найти значение в таблице')
+    return False, None
