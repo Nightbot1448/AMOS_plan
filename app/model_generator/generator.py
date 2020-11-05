@@ -1,8 +1,6 @@
 import numpy as np
 import statistical_tests
 
-np.set_printoptions(suppress=True)
-
 class FullFactorModel:
     def __init__(self, count_of_parallel_experiments, count_of_factors):
         self.count_of_factors = count_of_factors
@@ -30,8 +28,8 @@ class FullFactorModel:
         
         # b0 + b1 * x1 + b2 * x2 + b12 * x1 * x2 ##1 + cos(x1*x2)
         # TODO change model to non parabaloid
-        self.y_mean = (self.model_coef@self.b_coef)[:,np.newaxis] #\
-            # + np.cos(self.model_coef[:,-1])[:,np.newaxis] + np.sin(self.model_coef[:,-1])[:,np.newaxis]
+        self.y_mean = (self.model_coef@self.b_coef)[:,np.newaxis] \
+             + np.cos(self.model_coef[:,-1])[:,np.newaxis] + np.sin(self.model_coef[:,-1])[:,np.newaxis]
         self.y_vals = np.hstack([self.y_mean for _ in range(count_of_parallel_experiments)])
         noise = np.random.normal(0,10,(self.y_vals.shape[0]-1, self.y_vals.shape[1]))
         noise = np.vstack((noise, np.random.normal(0,30,(1, self.y_vals.shape[1]))))
@@ -170,6 +168,7 @@ class FullFactorModel:
 
 if __name__ == '__main__':
     # np.random.seed(0)
+    # np.set_printoptions(suppress=True)
     count_of_parallel_experiments = 5
     counts_of_factors = 2
 
