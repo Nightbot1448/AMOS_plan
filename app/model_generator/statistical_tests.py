@@ -1,5 +1,6 @@
 import numpy as np
-from statistics import *
+# from statistics import *
+import critical_stat_values
 
 def cochrain_test(prac_cochrain, count_of_parallel_experiments, count_of_points):
     print('Оценка воспроизводимости критерием Кохрена')
