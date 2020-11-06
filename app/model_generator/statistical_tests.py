@@ -15,10 +15,10 @@ def cochrain_test(prac_cochrain, df_numerator, df_denominator, p_value=0.01):
                 else cochrain.cochrain_01)[denominator_idx][enumerator_idx]
         print('Наблюдаемое значение: ', round(prac_cochrain, 3))
         print('Критическое значение: ', round(cochrain_crit, 3))
-        return True, prac_cochrain < cochrain_crit
+        return True, prac_cochrain < cochrain_crit, cochrain_crit
     else:
         print('Не удалось найти значение в таблице')
-    return False, None
+    return False, None, None
 
 def student_test(prac_student_values, df, p_value=0.01):
     print('Проверка значимости оценок параметров критерием Стьдента')
@@ -33,10 +33,10 @@ def student_test(prac_student_values, df, p_value=0.01):
         # > критерия == значимые
         print('Наблюдаемые значения:', np.round(prac_student_values, 3))
         print('Критическое значение:', round(crit_t_value, 3))
-        return True, prac_student_values > crit_t_value
+        return True, prac_student_values > crit_t_value, crit_t_value
     else:
         print('Не удалось найти значение в таблице')
-    return False, None
+    return False, None, None
 
 def fisher_test(prac_fisher_value, df_enumerator, df_denominator, p_value=0.01):
     print('Проверка адекватности критерием Фишера')
@@ -51,7 +51,7 @@ def fisher_test(prac_fisher_value, df_enumerator, df_denominator, p_value=0.01):
                 else fisher.fisher_01)[denominator_idx][enumerator_idx]
         print('Наблюдаемые значения:', round(prac_fisher_value, 3))
         print('Критическое значение:', round(crit_f_value,3))
-        return True, prac_fisher_value < crit_f_value
+        return True, prac_fisher_value < crit_f_value, crit_f_value
     else:
         print('Не удалось найти значение в таблице')
-    return False, None
+    return False, None, None
