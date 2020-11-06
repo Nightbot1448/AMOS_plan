@@ -25,10 +25,10 @@ class FullFactorModel:
 
     
     def main_experiment(self):
-        # b0 + b1 * x1 + b2 * x2 + b12 * x1 * x2 + cos(x1*x2) + sin(x1*x2)
+        # b0 + b1 * x1 + b2 * x2 + b12 * x1 * x2 + cos(x1*x2)
         # TODO change model to non parabaloid
         self.y_mean = (self.basis_function_values@self.b_coef)[:,np.newaxis] \
-             + np.cos(self.basis_function_values[:,-1])[:,np.newaxis] + np.sin(self.basis_function_values[:,-1])[:,np.newaxis]
+             + 20*np.cos(self.basis_function_values[:,-1])[:,np.newaxis]
         self.y_vals = np.hstack([self.y_mean for _ in range(count_of_parallel_experiments)])
         noise = np.random.normal(0,10,(self.y_vals.shape[0]-1, self.y_vals.shape[1]))
         noise = np.vstack((noise, np.random.normal(0,30,(1, self.y_vals.shape[1]))))
@@ -86,10 +86,7 @@ class FullFactorModel:
         df_denominator = self.count_of_points
         prac_cochrain_val = self.cochran_value(var)
         reproducible_success, reproducible_result, cochrain_critical_value = statistical_tests.cochrain_test(
-            prac_cochrain_val, 
-            df_numerator,
-            df_denominator,
-            0.01
+            prac_cochrain_val, df_numerator, df_denominator, 0.01
         )
         debug_output.print_reproducibility_check(
             self, reproducible_success, reproducible_result, cochrain_critical_value
@@ -110,17 +107,16 @@ class FullFactorModel:
 
     def update_model_response(self):
         'Обновление отклика модели после удаления незначимых коэффициентов'
-        
-        self.model_response = self.significant_points@self.significant_b_coef
-        old_res = self.basis_function_values@self.prac_b_coef
-        mean, var = self.points_mean_var()
         #ASK лучше чем что должно было получиться
-        # print('update_model_response')
-        # print('До удалениея незначимых:                     ', np.round(old_res.reshape(-1),3))
-        # print('После удаления незначимых:                   ', np.round(self.model_response.reshape(-1),3))
-        # print('Средние значения оклика:                     ', np.round(mean,3))
-        # print('Сгенерированные коэфициенты значения оклика: ', np.round(np.squeeze(self.y_mean),3))
-        # print('diff: ', mean-old_res.reshape(-1))
+        # before = self.model_response.copy()
+        self.model_response = self.significant_points@self.significant_b_coef
+        # print('До удалениея незначимых:  ', np.round(before,3))
+        # print('После удаления незначимых:', np.round(self.model_response,3))
+        # print('Отклик модели без шума:   ', np.round(np.squeeze(self.y_mean),3))
+        # diff_before = np.squeeze(self.y_mean)-before
+        # diff_after = np.squeeze(self.y_mean)-self.model_response
+        # print('Разность до удаления:     ', np.round(diff_before,3), round(np.abs(diff_before).sum(),3))
+        # print('Разность после удаления:  ', np.round(diff_after,3), round(np.abs(diff_after).sum(),3))
         
     def object_model(self):
         self.get_estimate_parameters()
@@ -131,12 +127,12 @@ class FullFactorModel:
             if np.logical_not(self.significant_coef).any():
                 self.remove_insignificant_coefs()
                 self.update_model_response()
-        debug_output.print_object_model(self, student_test_success, student_crit)
+        debug_output.print_object_model(
+            self, student_test_success, student_crit
+        )
 
     def significance_estimate_parameters(self):
-        """
-            Значимость оценок параметров. Критерий Стьюдента
-        """
+        'Значимость оценок параметров. Критерий Стьюдента'        
         df = self.count_of_points * (self.count_of_parallel_experiments - 1)
         prac_student_test = self.student_values()
         student_test_success, student_test_result, student_crit = statistical_tests.student_test(
@@ -148,9 +144,7 @@ class FullFactorModel:
         return df, student_test_success, prac_student_test, student_crit
 
     def adequacy_check(self):
-        """
-            Адекватность. Критерий Фишера.
-        """
+        'Адекватность. Критерий Фишера.'
         prac_fisher_test = self.fisher_value()
 
         df_enumerator = self.count_of_points - self.significant_coef.sum()\
@@ -165,7 +159,6 @@ class FullFactorModel:
 
 
 if __name__ == '__main__':
-    # np.random.seed(0)
     np.set_printoptions(suppress=True)
     count_of_parallel_experiments = 5
     counts_of_factors = 2
