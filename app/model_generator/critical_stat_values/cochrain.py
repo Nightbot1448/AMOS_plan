@@ -1,4 +1,4 @@
-enumerators = [1,2,3,4]
+numerators = [1,2,3,4]
 denominators = [2,4,6,8,10,12,15,20,24,30,40]
 
 cochrain_01 = [

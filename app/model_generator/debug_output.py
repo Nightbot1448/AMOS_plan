@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def print_reproducibility_check(self, reproducible_success, reproducible_result, cochrain_critical_value):
     print('--------------------------------------------------------------')
     mean, var = self.points_mean_var()
