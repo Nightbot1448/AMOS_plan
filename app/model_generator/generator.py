@@ -33,9 +33,7 @@ class FullFactorModel:
         self.__noise__main_2 = self.__noise__main_1 * 1
         self.__noise_additional = self.__noise__main_1 * 1
     
-    # 4
-
-    def variant_5(self):
+    def variant_4(self):
         b_range = 1000
         self.b_coef = np.random.rand(4)*b_range-b_range/2
         self.__cos_coef = 1
@@ -45,7 +43,7 @@ class FullFactorModel:
         self.__noise__main_2 = self.__noise__main_1 * 10
         self.__noise_additional = self.__noise__main_1 * 1
 
-    def variant_6(self):
+    def variant_5(self):
         b_range = 1000
         self.b_coef = np.random.rand(4)*b_range-b_range/2
         self.__cos_coef = 100
@@ -55,33 +53,15 @@ class FullFactorModel:
         self.__noise__main_2 = self.__noise__main_1 * 10
         self.__noise_additional = self.__noise__main_1 * 1
 
-    def variant_7(self):
+    def variant_6(self):
         b_range = 10
         self.b_coef = np.random.rand(4)*b_range-b_range/2
         self.__cos_coef = 0.1
         self.y_mean = (self.basis_function_values@self.b_coef)[:,np.newaxis] \
              + self.__cos_coef*np.cos(self.basis_function_values[:,-1])[:,np.newaxis]
-        self.__noise__main_1 = 0.7
+        self.__noise__main_1 = 1.2
         self.__noise__main_2 = self.__noise__main_1 * 10
         self.__noise_additional = self.__noise__main_1 * 1
-
-    # 8
-
-
-    # repr: __noise__main_2 / __noise__main_1
-    # sign: __noise__main_1 & b_range
-    # adeq: __cos_coef & __noise__main
-
-    def variant_X(self):
-        b_range = 10
-        self.b_coef = np.random.rand(4)*b_range
-        self.__cos_coef = 1
-        self.y_mean = (self.basis_function_values@self.b_coef)[:,np.newaxis] \
-             + self.__cos_coef*np.cos(self.basis_function_values[:,-1])[:,np.newaxis]
-        self.__noise__main_1 = 10
-        self.__noise__main_2 = self.__noise__main_1 * 1
-        self.__noise_additional = self.__noise__main_1 * 1
-
 
     def __init__(self, count_of_parallel_experiments, count_of_factors, normalized_points, generate_variant, debug_print=False):
         self.count_of_factors = count_of_factors
@@ -250,32 +230,11 @@ if __name__ == '__main__':
         [ 1, -1],
         [-1, -1],
     ])
-    stat = True
-    variant = FullFactorModel.variant_X
-    if stat:
-        repr_res, sign_res, adeq_res, res = [], [], [], []
-        sz = 1000
-        for _ in range(sz):
-            f = FullFactorModel(count_of_parallel_experiments, counts_of_factors, normalized_points, variant)
-            f.main_experiment()
-            repr_ = f.reproducibility_check()
-            sign_ = f.object_model()
-            adeq_ = f.adequacy_check()
-            repr_res.append(repr_)
-            sign_res.append(sign_)
-            adeq_res.append(adeq_)
-            res.append((repr_, sign_, adeq_) == (True, False, True))
-        
-        print('Repr', np.sum(repr_res)/sz)
-        print('Sign', np.sum(sign_res)/sz)
-        print('Adeq', np.sum(adeq_res)/sz)
-        print('Res ', np.sum(res)/sz)
-        
-    else:
-        f = FullFactorModel(count_of_parallel_experiments, counts_of_factors, normalized_points, variant)
-        f.main_experiment()
-        print(np.round(f.y_vals,3))
-        print(f.y_vals.mean(1))
-        print(f.reproducibility_check())
-        print(f.object_model())
-        print(f.adequacy_check())
+
+    variant = FullFactorModel.variant_1
+
+    f = FullFactorModel(count_of_parallel_experiments, counts_of_factors, normalized_points, variant, True)
+    f.main_experiment()
+    f.reproducibility_check()
+    f.object_model()
+    f.adequacy_check()
