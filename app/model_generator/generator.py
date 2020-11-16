@@ -63,12 +63,31 @@ class FullFactorModel:
         self.__noise__main_2 = self.__noise__main_1 * 10
         self.__noise_additional = self.__noise__main_1 * 1
 
+    def __check_sign(self):
+        self.main_experiment()
+        self.reproducibility_check()
+        self.get_estimate_parameters()
+        _, success, result,_ = self.significance_estimate_parameters()
+        if success and self.significant_coef.sum() > 1:
+            return True
+        else:
+            print('------------------------FUCK ABOVE------------------------')
+            return False
+
+    def __drop_values(self):
+        self.y_vals = None
+        self.reproducibility_var = None
+        self.prac_b_coef = None
+        self.model_response = None
+        self.var_params_of_model = None
+        self.additional_experiment_conducted = False
+
     def __init__(self, count_of_parallel_experiments, count_of_factors, normalized_points, generate_variant, debug_print=False):
         self.count_of_factors = count_of_factors
         self.count_of_points = 2**count_of_factors
         self.count_of_parallel_experiments = count_of_parallel_experiments
         
-        self.additional_experiment_experiment_conducted = False
+        self.additional_experiment_conducted = False
         self.debug_print = debug_print
         
         self.reproducibility_var = None
@@ -86,6 +105,12 @@ class FullFactorModel:
 
         # TODO поменять на зависимость от варианта
         generate_variant(self)
+        while not self.__check_sign():
+            self.__drop_values()
+            generate_variant(self)
+
+        self.object_model()
+        self.adequacy_check()
         
     def main_experiment(self):
         self.y_vals = np.hstack([self.y_mean for _ in range(count_of_parallel_experiments)])
@@ -99,10 +124,11 @@ class FullFactorModel:
             Проводится по центральной точке
         """
         #TODO заменить на рассчет по модели
-        y_val = np.array([1, 0, 0, 0])@self.b_coef + self.__cos_coef*np.cos(0)
-        y_vals = np.array([y_val for _ in range(self.count_of_parallel_experiments)]).reshape(1,-1)
-        y_vals += np.random.normal(0,self.__noise_additional, y_vals.shape)
-        self.y_vals = np.vstack((self.y_vals, y_vals))
+        # y_val = np.array([1, 0, 0, 0])@self.b_coef + self.__cos_coef*np.cos(0)
+        # y_vals = np.array([y_val for _ in range(self.count_of_parallel_experiments)]).reshape(1,-1)
+        # y_vals += np.random.normal(0,self.__noise_additional, y_vals.shape)
+        # self.y_vals = np.vstack((self.y_vals, y_vals))
+        self.y_vals = np.vstack((self.y_vals, np.array([-5.08, -5.08, 9.76])))
     
     def points_mean_var(self):
         y_prac_mean = self.y_vals.mean(1)
@@ -117,12 +143,12 @@ class FullFactorModel:
 
     def fisher_value(self):
         df_adequacy = self.count_of_points - self.significant_coef.sum() \
-            + self.additional_experiment_experiment_conducted
+            + self.additional_experiment_conducted
         if self.adequacy_var is None:
             if df_adequacy == 0:
                 if self.y_vals.shape[0] == self.count_of_points:
                     self.additional_experiment()
-                    self.additional_experiment_experiment_conducted = True
+                    self.additional_experiment_conducted = True
                 self.adequacy_var = self.count_of_parallel_experiments \
                     * (self.y_vals[-1].mean() - self.prac_b_coef[0])**2
             else:
@@ -172,6 +198,14 @@ class FullFactorModel:
             self.significant_coef = student_test_result
         return df, student_test_success, prac_student_test, student_crit
 
+    def update_b_coef(self):
+        print('\t  sing:', self.significant_coef)
+        print('\tbefore:', self.prac_b_coef)
+        mean, _ = self.points_mean_var()
+        self.prac_b_coef = self.basis_function_values[:,self.significant_coef] @ \
+            mean[:4][self.significant_coef] / self.count_of_points
+        print('\t after:',self.prac_b_coef)
+
     def remove_insignificant_coefs(self):
         'Удаление незначимых коэффициентов'
         self.significant_b_coef = self.prac_b_coef[self.significant_coef]
@@ -180,15 +214,18 @@ class FullFactorModel:
     def update_model_response(self):
         'Обновление отклика модели после удаления незначимых коэффициентов'
         #ASK лучше чем что должно было получиться
-        # before = self.model_response.copy()
+        before = self.model_response.copy()
+        # TODO пересчитать коэффициенты B
+        # TODO пересчитать по канону МНК
+
         self.model_response = self.significant_points@self.significant_b_coef
-        # print('До удалениея незначимых:  ', np.round(before,3))
-        # print('После удаления незначимых:', np.round(self.model_response,3))
-        # print('Отклик модели без шума:   ', np.round(np.squeeze(self.y_mean),3))
-        # diff_before = np.squeeze(self.y_mean)-before
-        # diff_after = np.squeeze(self.y_mean)-self.model_response
-        # print('Разность до удаления:     ', np.round(diff_before,3), round(np.abs(diff_before).sum(),3))
-        # print('Разность после удаления:  ', np.round(diff_after,3), round(np.abs(diff_after).sum(),3))
+        print('До удалениея незначимых:  ', np.round(before,3))
+        print('После удаления незначимых:', np.round(self.model_response,3))
+        print('Отклик модели без шума:   ', np.round(np.squeeze(self.y_mean),3))
+        diff_before = np.squeeze(self.y_mean)-before
+        diff_after = np.squeeze(self.y_mean)-self.model_response
+        print('Разность до удаления:     ', np.round(diff_before,3), round(np.abs(diff_before).sum(),3))
+        print('Разность после удаления:  ', np.round(diff_after,3), round(np.abs(diff_after).sum(),3))
 
     def object_model(self):
         self.get_estimate_parameters()
@@ -197,6 +234,7 @@ class FullFactorModel:
         
         if student_test_success:
             if np.logical_not(self.significant_coef).any():
+                self.update_b_coef()
                 self.remove_insignificant_coefs()
                 self.update_model_response()
 
@@ -209,7 +247,7 @@ class FullFactorModel:
         prac_fisher_test = self.fisher_value()
 
         df_numerator = self.count_of_points - self.significant_coef.sum()\
-             + self.additional_experiment_experiment_conducted
+             + self.additional_experiment_conducted
         df_denominator = self.count_of_points * (self.count_of_parallel_experiments - 1)
         fisher_test_success, fisher_test_result, fisher_crit_value = \
             statistical_tests.fisher_test(prac_fisher_test, df_numerator, df_denominator, 0.01)
@@ -221,7 +259,7 @@ class FullFactorModel:
 
 if __name__ == '__main__':
     np.set_printoptions(suppress=True)
-    count_of_parallel_experiments = 5
+    count_of_parallel_experiments = 3
     counts_of_factors = 2
 
     normalized_points = np.array([
@@ -231,10 +269,22 @@ if __name__ == '__main__':
         [-1, -1],
     ])
 
-    variant = FullFactorModel.variant_1
+    variant = FullFactorModel.variant_3
 
     f = FullFactorModel(count_of_parallel_experiments, counts_of_factors, normalized_points, variant, True)
-    f.main_experiment()
+
+    f.y_vals = np.array([
+        [82.06, 67.50, 54.42],
+        [-140.83, -140.83, -140.83],
+        [-160.83, -160.83, -160.83],
+        [419.17, 406.54, 406.54]
+    ])
+
+    print('FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK')
+
+    f.adequacy_var = None
+    f.additional_experiment_conducted = False
+
     f.reproducibility_check()
     f.object_model()
     f.adequacy_check()
