@@ -77,12 +77,16 @@ class FullFactorModel:
     def __drop_values(self):
         self.y_vals = None
         self.reproducibility_var = None
+        self.adequacy_var = None
         self.prac_b_coef = None
         self.model_response = None
         self.var_params_of_model = None
         self.additional_experiment_conducted = False
 
     def __init__(self, count_of_parallel_experiments, count_of_factors, normalized_points, generate_variant, debug_print=False):
+
+        self.__results = {}
+
         self.count_of_factors = count_of_factors
         self.count_of_points = 2**count_of_factors
         self.count_of_parallel_experiments = count_of_parallel_experiments
@@ -103,7 +107,6 @@ class FullFactorModel:
         # TODO центрирование и нормирование 
         # points = np.ones((2**count_of_factors, count_of_factors))
 
-        # TODO поменять на зависимость от варианта
         generate_variant(self)
         while not self.__check_sign():
             self.__drop_values()
@@ -124,11 +127,11 @@ class FullFactorModel:
             Проводится по центральной точке
         """
         #TODO заменить на рассчет по модели
-        # y_val = np.array([1, 0, 0, 0])@self.b_coef + self.__cos_coef*np.cos(0)
-        # y_vals = np.array([y_val for _ in range(self.count_of_parallel_experiments)]).reshape(1,-1)
-        # y_vals += np.random.normal(0,self.__noise_additional, y_vals.shape)
-        # self.y_vals = np.vstack((self.y_vals, y_vals))
-        self.y_vals = np.vstack((self.y_vals, np.array([-5.08, -5.08, 9.76])))
+        y_val = np.array([1, 0, 0, 0])@self.b_coef + self.__cos_coef*np.cos(0)
+        y_vals = np.array([y_val for _ in range(self.count_of_parallel_experiments)]).reshape(1,-1)
+        y_vals += np.random.normal(0,self.__noise_additional, y_vals.shape)
+        self.y_vals = np.vstack((self.y_vals, y_vals))
+        # self.y_vals = np.vstack((self.y_vals, np.array([-5.08, -5.08, 9.76])))
     
     def points_mean_var(self):
         y_prac_mean = self.y_vals.mean(1)
@@ -163,7 +166,7 @@ class FullFactorModel:
             Тест Кохрена
         """
         # Среднее и дисперсия
-        _, var = self.points_mean_var()
+        mean, var = self.points_mean_var()
         self.reproducibility_var = var.mean()
         # Тест Кохрена
         df_numerator = self.count_of_parallel_experiments - 1
@@ -172,6 +175,22 @@ class FullFactorModel:
         reproducible_success, reproducible_result, cochrain_critical_value = statistical_tests.cochrain_test(
             prac_cochrain_val, df_numerator, df_denominator, 0.01
         )
+
+        print('-----------',prac_cochrain_val)
+
+        self.__results.update({
+            'mean': mean,
+            'var': var,
+            'cochrain': {
+                'prac_value': prac_cochrain_val,
+                'df_numerator': df_numerator,
+                'df_denominator': df_denominator,
+                'crit_value': cochrain_critical_value,
+            },
+            'is_reproducible': reproducible_result,
+            'reproducibility_var': self.reproducibility_var
+        })
+
         if self.debug_print:
             debug_output.print_reproducibility_check(
                 self, reproducible_success, reproducible_result, cochrain_critical_value
@@ -232,11 +251,29 @@ class FullFactorModel:
         df_student, student_test_success, prac_student_values, student_crit = \
             self.significance_estimate_parameters()
         
+
+
         if student_test_success:
             if np.logical_not(self.significant_coef).any():
                 self.update_b_coef()
                 self.remove_insignificant_coefs()
                 self.update_model_response()
+
+        self.__results.update({
+            'model_params': self.prac_b_coef,
+            'model_params_var': self.var_params_of_model,
+            'student': {
+                'model_response': self.model_response,
+                'prac_value': self.student_values(),
+                'df': df_student,
+                'crit_value': student_crit,
+            },
+            'is_sign': self.significant_coef,
+            'all_coefs': self.prac_b_coef,
+            'sign_coef': self.significant_b_coef \
+                if np.logical_not(self.significant_coef).any() \
+                else self.prac_b_coef
+        })
 
         if self.debug_print:
             debug_output.print_object_model(self, student_test_success, student_crit)
@@ -251,14 +288,30 @@ class FullFactorModel:
         df_denominator = self.count_of_points * (self.count_of_parallel_experiments - 1)
         fisher_test_success, fisher_test_result, fisher_crit_value = \
             statistical_tests.fisher_test(prac_fisher_test, df_numerator, df_denominator, 0.01)
+
+        self.__results.update({
+            'fisher': {
+                'prac_value': prac_fisher_test,
+                'df_numerator': df_numerator,
+                'df_denominator': df_denominator,
+                'crit_value': fisher_crit_value,
+            },
+            'is_adequacy': fisher_test_result,
+            'adequcy_var': self.adequacy_var
+        })
+
         if self.debug_print:
             debug_output.print_adequacy_check(
                 self, fisher_test_success, fisher_test_result, fisher_crit_value
             )
         return fisher_test_result
+    
+    def get_results(self):
+        return self.__results
 
 if __name__ == '__main__':
     np.set_printoptions(suppress=True)
+    # np.random.seed(0)
     count_of_parallel_experiments = 3
     counts_of_factors = 2
 
@@ -269,22 +322,21 @@ if __name__ == '__main__':
         [-1, -1],
     ])
 
-    variant = FullFactorModel.variant_3
+    variant = FullFactorModel.variant_1
 
-    f = FullFactorModel(count_of_parallel_experiments, counts_of_factors, normalized_points, variant, True)
+    f = FullFactorModel(count_of_parallel_experiments, counts_of_factors, normalized_points, variant, False)
 
-    f.y_vals = np.array([
-        [82.06, 67.50, 54.42],
-        [-140.83, -140.83, -140.83],
-        [-160.83, -160.83, -160.83],
-        [419.17, 406.54, 406.54]
-    ])
+    # f.y_vals = np.array([
+    #     [82.06, 67.50, 54.42],
+    #     [-140.83, -140.83, -140.83],
+    #     [-160.83, -160.83, -160.83],
+    #     [419.17, 406.54, 406.54]
+    # ])
 
     print('FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK')
-
-    f.adequacy_var = None
-    f.additional_experiment_conducted = False
 
     f.reproducibility_check()
     f.object_model()
     f.adequacy_check()
+
+    print(f.get_results())
