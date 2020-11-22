@@ -68,23 +68,28 @@ class FullFactorModel:
         self.reproducibility_check()
         self.get_estimate_parameters()
         _, success, result,_ = self.significance_estimate_parameters()
-        if success and self.significant_coef.sum() > 1:
+        flag = success and self.significant_coef.sum() > 1
+        if flag:
+            self.__drop_processed()
             return True
         else:
-            print('------------------------FUCK ABOVE------------------------')
+            self.__drop_all()
             return False
 
-    def __drop_values(self):
-        self.y_vals = None
+    def __drop_processed(self):
         self.reproducibility_var = None
         self.adequacy_var = None
         self.prac_b_coef = None
         self.model_response = None
         self.var_params_of_model = None
         self.additional_experiment_conducted = False
+        self.__results = {}
+
+    def __drop_all(self):
+        self.y_vals = None
+        self.__drop_processed()
 
     def __init__(self, count_of_parallel_experiments, count_of_factors, normalized_points, generate_variant, debug_print=False):
-
         self.__results = {}
 
         self.count_of_factors = count_of_factors
@@ -109,14 +114,13 @@ class FullFactorModel:
 
         generate_variant(self)
         while not self.__check_sign():
-            self.__drop_values()
             generate_variant(self)
 
-        self.object_model()
-        self.adequacy_check()
+        # self.object_model()
+        # self.adequacy_check()
         
     def main_experiment(self):
-        self.y_vals = np.hstack([self.y_mean for _ in range(count_of_parallel_experiments)])
+        self.y_vals = np.hstack([self.y_mean for _ in range(self.count_of_parallel_experiments)])
         noise = np.random.normal(0,self.__noise__main_1,(self.y_vals.shape[0]-1, self.y_vals.shape[1]))
         noise = np.vstack((noise, np.random.normal(0,self.__noise__main_2,(1, self.y_vals.shape[1]))))
         self.y_vals += noise
@@ -248,8 +252,6 @@ class FullFactorModel:
         df_student, student_test_success, prac_student_values, student_crit = \
             self.significance_estimate_parameters()
         
-
-
         if student_test_success:
             if np.logical_not(self.significant_coef).any():
                 self.update_b_coef()
@@ -285,7 +287,7 @@ class FullFactorModel:
         df_denominator = self.count_of_points * (self.count_of_parallel_experiments - 1)
         fisher_test_success, fisher_test_result, fisher_crit_value = \
             statistical_tests.fisher_test(prac_fisher_test, df_numerator, df_denominator, 0.01)
-
+        #TODO add info about additional experiment
         self.__results.update({
             'fisher': {
                 'prac_value': prac_fisher_test,
@@ -319,7 +321,7 @@ if __name__ == '__main__':
         [-1, -1],
     ])
 
-    variant = FullFactorModel.variant_1
+    variant = FullFactorModel.variant_3
 
     f = FullFactorModel(count_of_parallel_experiments, counts_of_factors, normalized_points, variant, False)
 
