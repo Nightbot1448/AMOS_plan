@@ -63,12 +63,35 @@ class FullFactorModel:
         self.__noise__main_2 = self.__noise__main_1 * 10
         self.__noise_additional = self.__noise__main_1 * 1
 
+    def __check_sign(self):
+        self.main_experiment()
+        self.reproducibility_check()
+        self.get_estimate_parameters()
+        _, success, result,_ = self.significance_estimate_parameters()
+        if success and self.significant_coef.sum() > 1:
+            return True
+        else:
+            print('------------------------FUCK ABOVE------------------------')
+            return False
+
+    def __drop_values(self):
+        self.y_vals = None
+        self.reproducibility_var = None
+        self.adequacy_var = None
+        self.prac_b_coef = None
+        self.model_response = None
+        self.var_params_of_model = None
+        self.additional_experiment_conducted = False
+
     def __init__(self, count_of_parallel_experiments, count_of_factors, normalized_points, generate_variant, debug_print=False):
+
+        self.__results = {}
+
         self.count_of_factors = count_of_factors
         self.count_of_points = 2**count_of_factors
         self.count_of_parallel_experiments = count_of_parallel_experiments
         
-        self.additional_experiment_experiment_conducted = False
+        self.additional_experiment_conducted = False
         self.debug_print = debug_print
         
         self.reproducibility_var = None
@@ -84,8 +107,13 @@ class FullFactorModel:
         # TODO центрирование и нормирование 
         # points = np.ones((2**count_of_factors, count_of_factors))
 
-        # TODO поменять на зависимость от варианта
         generate_variant(self)
+        while not self.__check_sign():
+            self.__drop_values()
+            generate_variant(self)
+
+        self.object_model()
+        self.adequacy_check()
         
     def main_experiment(self):
         self.y_vals = np.hstack([self.y_mean for _ in range(count_of_parallel_experiments)])
@@ -98,11 +126,11 @@ class FullFactorModel:
             Дополнительный эксперимент. 
             Проводится по центральной точке
         """
-        #TODO заменить на рассчет по модели
         y_val = np.array([1, 0, 0, 0])@self.b_coef + self.__cos_coef*np.cos(0)
         y_vals = np.array([y_val for _ in range(self.count_of_parallel_experiments)]).reshape(1,-1)
         y_vals += np.random.normal(0,self.__noise_additional, y_vals.shape)
         self.y_vals = np.vstack((self.y_vals, y_vals))
+        # self.y_vals = np.vstack((self.y_vals, np.array([-25.07,-25.07,-25.07,19.77,19.77])))
     
     def points_mean_var(self):
         y_prac_mean = self.y_vals.mean(1)
@@ -117,12 +145,12 @@ class FullFactorModel:
 
     def fisher_value(self):
         df_adequacy = self.count_of_points - self.significant_coef.sum() \
-            + self.additional_experiment_experiment_conducted
+            + self.additional_experiment_conducted
         if self.adequacy_var is None:
             if df_adequacy == 0:
                 if self.y_vals.shape[0] == self.count_of_points:
                     self.additional_experiment()
-                    self.additional_experiment_experiment_conducted = True
+                    self.additional_experiment_conducted = True
                 self.adequacy_var = self.count_of_parallel_experiments \
                     * (self.y_vals[-1].mean() - self.prac_b_coef[0])**2
             else:
@@ -137,7 +165,7 @@ class FullFactorModel:
             Тест Кохрена
         """
         # Среднее и дисперсия
-        _, var = self.points_mean_var()
+        mean, var = self.points_mean_var()
         self.reproducibility_var = var.mean()
         # Тест Кохрена
         df_numerator = self.count_of_parallel_experiments - 1
@@ -146,6 +174,20 @@ class FullFactorModel:
         reproducible_success, reproducible_result, cochrain_critical_value = statistical_tests.cochrain_test(
             prac_cochrain_val, df_numerator, df_denominator, 0.01
         )
+
+        self.__results.update({
+            'mean': mean,
+            'var': var,
+            'cochrain': {
+                'prac_value': prac_cochrain_val,
+                'df_numerator': df_numerator,
+                'df_denominator': df_denominator,
+                'crit_value': cochrain_critical_value,
+            },
+            'is_reproducible': reproducible_result,
+            'reproducibility_var': self.reproducibility_var
+        })
+
         if self.debug_print:
             debug_output.print_reproducibility_check(
                 self, reproducible_success, reproducible_result, cochrain_critical_value
@@ -172,6 +214,14 @@ class FullFactorModel:
             self.significant_coef = student_test_result
         return df, student_test_success, prac_student_test, student_crit
 
+    def update_b_coef(self):
+        print('\t  sing:', self.significant_coef)
+        print('\tbefore:', self.prac_b_coef)
+        mean, _ = self.points_mean_var()
+        self.prac_b_coef = self.basis_function_values[:,self.significant_coef] @ \
+            mean[:4][self.significant_coef] / self.count_of_points
+        print('\t after:',self.prac_b_coef)
+
     def remove_insignificant_coefs(self):
         'Удаление незначимых коэффициентов'
         self.significant_b_coef = self.prac_b_coef[self.significant_coef]
@@ -180,25 +230,47 @@ class FullFactorModel:
     def update_model_response(self):
         'Обновление отклика модели после удаления незначимых коэффициентов'
         #ASK лучше чем что должно было получиться
-        # before = self.model_response.copy()
+        before = self.model_response.copy()
+        # TODO пересчитать коэффициенты B
+        # TODO пересчитать по канону МНК
+
         self.model_response = self.significant_points@self.significant_b_coef
-        # print('До удалениея незначимых:  ', np.round(before,3))
-        # print('После удаления незначимых:', np.round(self.model_response,3))
-        # print('Отклик модели без шума:   ', np.round(np.squeeze(self.y_mean),3))
-        # diff_before = np.squeeze(self.y_mean)-before
-        # diff_after = np.squeeze(self.y_mean)-self.model_response
-        # print('Разность до удаления:     ', np.round(diff_before,3), round(np.abs(diff_before).sum(),3))
-        # print('Разность после удаления:  ', np.round(diff_after,3), round(np.abs(diff_after).sum(),3))
+        print('До удалениея незначимых:  ', np.round(before,3))
+        print('После удаления незначимых:', np.round(self.model_response,3))
+        print('Отклик модели без шума:   ', np.round(np.squeeze(self.y_mean),3))
+        diff_before = np.squeeze(self.y_mean)-before
+        diff_after = np.squeeze(self.y_mean)-self.model_response
+        print('Разность до удаления:     ', np.round(diff_before,3), round(np.abs(diff_before).sum(),3))
+        print('Разность после удаления:  ', np.round(diff_after,3), round(np.abs(diff_after).sum(),3))
 
     def object_model(self):
         self.get_estimate_parameters()
         df_student, student_test_success, prac_student_values, student_crit = \
             self.significance_estimate_parameters()
         
+
+
         if student_test_success:
             if np.logical_not(self.significant_coef).any():
+                self.update_b_coef()
                 self.remove_insignificant_coefs()
                 self.update_model_response()
+
+        self.__results.update({
+            'model_params': self.prac_b_coef,
+            'model_params_var': self.var_params_of_model,
+            'student': {
+                'model_response': self.model_response,
+                'prac_value': self.student_values(),
+                'df': df_student,
+                'crit_value': student_crit,
+            },
+            'is_sign': self.significant_coef,
+            'all_coefs': self.prac_b_coef,
+            'sign_coef': self.significant_b_coef \
+                if np.logical_not(self.significant_coef).any() \
+                else self.prac_b_coef
+        })
 
         if self.debug_print:
             debug_output.print_object_model(self, student_test_success, student_crit)
@@ -209,18 +281,34 @@ class FullFactorModel:
         prac_fisher_test = self.fisher_value()
 
         df_numerator = self.count_of_points - self.significant_coef.sum()\
-             + self.additional_experiment_experiment_conducted
+             + self.additional_experiment_conducted
         df_denominator = self.count_of_points * (self.count_of_parallel_experiments - 1)
         fisher_test_success, fisher_test_result, fisher_crit_value = \
             statistical_tests.fisher_test(prac_fisher_test, df_numerator, df_denominator, 0.01)
+
+        self.__results.update({
+            'fisher': {
+                'prac_value': prac_fisher_test,
+                'df_numerator': df_numerator,
+                'df_denominator': df_denominator,
+                'crit_value': fisher_crit_value,
+            },
+            'is_adequacy': fisher_test_result,
+            'adequcy_var': self.adequacy_var
+        })
+
         if self.debug_print:
             debug_output.print_adequacy_check(
                 self, fisher_test_success, fisher_test_result, fisher_crit_value
             )
         return fisher_test_result
+    
+    def get_results(self):
+        return self.__results
 
 if __name__ == '__main__':
     np.set_printoptions(suppress=True)
+    # np.random.seed(0)
     count_of_parallel_experiments = 5
     counts_of_factors = 2
 
@@ -233,8 +321,19 @@ if __name__ == '__main__':
 
     variant = FullFactorModel.variant_1
 
-    f = FullFactorModel(count_of_parallel_experiments, counts_of_factors, normalized_points, variant, True)
-    f.main_experiment()
+    f = FullFactorModel(count_of_parallel_experiments, counts_of_factors, normalized_points, variant, False)
+
+    # f.additional_experiment_conducted = False
+    # f.adequacy_var = None
+    # f.y_vals = np.array([
+    #     [99.21, 137.20, 115.62, 97.58, 97.58],
+    #     [-342.42,-342.42,-325.05,-325.05,-325.05],
+    #     [-105.05,-105.05,-105.05,-94.26,-94.26],
+    #     [265.74,265.74,265.74,265.74,238.11]
+    # ])
+
     f.reproducibility_check()
     f.object_model()
     f.adequacy_check()
+
+    print(f.get_results())

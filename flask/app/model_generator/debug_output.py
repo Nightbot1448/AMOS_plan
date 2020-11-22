@@ -42,7 +42,7 @@ def print_object_model(self, student_test_success, student_crit):
 def print_adequacy_check(self, fisher_test_success, fisher_test_result, fisher_crit):
     prac_fisher_value = self.fisher_value()
     df_numerator = self.count_of_points - self.significant_coef.sum()\
-            + self.additional_experiment_experiment_conducted
+            + self.additional_experiment_conducted
     df_denominator = self.count_of_points * (self.count_of_parallel_experiments - 1)
 
     print('--------------------------------------------------------------')
