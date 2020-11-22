@@ -126,12 +126,11 @@ class FullFactorModel:
             Дополнительный эксперимент. 
             Проводится по центральной точке
         """
-        #TODO заменить на рассчет по модели
         y_val = np.array([1, 0, 0, 0])@self.b_coef + self.__cos_coef*np.cos(0)
         y_vals = np.array([y_val for _ in range(self.count_of_parallel_experiments)]).reshape(1,-1)
         y_vals += np.random.normal(0,self.__noise_additional, y_vals.shape)
         self.y_vals = np.vstack((self.y_vals, y_vals))
-        # self.y_vals = np.vstack((self.y_vals, np.array([-5.08, -5.08, 9.76])))
+        # self.y_vals = np.vstack((self.y_vals, np.array([-25.07,-25.07,-25.07,19.77,19.77])))
     
     def points_mean_var(self):
         y_prac_mean = self.y_vals.mean(1)
@@ -175,8 +174,6 @@ class FullFactorModel:
         reproducible_success, reproducible_result, cochrain_critical_value = statistical_tests.cochrain_test(
             prac_cochrain_val, df_numerator, df_denominator, 0.01
         )
-
-        print('-----------',prac_cochrain_val)
 
         self.__results.update({
             'mean': mean,
@@ -312,7 +309,7 @@ class FullFactorModel:
 if __name__ == '__main__':
     np.set_printoptions(suppress=True)
     # np.random.seed(0)
-    count_of_parallel_experiments = 3
+    count_of_parallel_experiments = 5
     counts_of_factors = 2
 
     normalized_points = np.array([
@@ -326,14 +323,14 @@ if __name__ == '__main__':
 
     f = FullFactorModel(count_of_parallel_experiments, counts_of_factors, normalized_points, variant, False)
 
+    # f.additional_experiment_conducted = False
+    # f.adequacy_var = None
     # f.y_vals = np.array([
-    #     [82.06, 67.50, 54.42],
-    #     [-140.83, -140.83, -140.83],
-    #     [-160.83, -160.83, -160.83],
-    #     [419.17, 406.54, 406.54]
+    #     [99.21, 137.20, 115.62, 97.58, 97.58],
+    #     [-342.42,-342.42,-325.05,-325.05,-325.05],
+    #     [-105.05,-105.05,-105.05,-94.26,-94.26],
+    #     [265.74,265.74,265.74,265.74,238.11]
     # ])
-
-    print('FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK')
 
     f.reproducibility_check()
     f.object_model()
