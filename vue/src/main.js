@@ -3,6 +3,13 @@
 import Vue from 'vue';
 import App from './App';
 import router from './router';
+import Preparation from './components/Preparation.vue';
+import Task from './components/Task.vue';
+import PlanningArea from './components/PlanningArea.vue';
+import Planning from './components/Planning.vue';
+import Conduct from './components/Conduct.vue';
+import Processing from './components/Processing.vue';
+import { store } from './store'
 
 Vue.config.productionTip = false;
 
@@ -10,6 +17,9 @@ Vue.config.productionTip = false;
 new Vue({
   el: '#app',
   router,
-  components: { App },
+  components: { App, Preparation, 
+    Task, PlanningArea,  Planning,
+    Conduct, Processing},
   template: '<App/>',
+  store: store
 });
