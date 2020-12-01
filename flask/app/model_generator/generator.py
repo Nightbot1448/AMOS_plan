@@ -1,6 +1,6 @@
 import numpy as np
-import statistical_tests
-import debug_output
+from . import statistical_tests
+from . import debug_output
 
 class FullFactorModel:
     def variant_1(self):
