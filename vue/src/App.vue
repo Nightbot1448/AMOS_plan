@@ -3,7 +3,7 @@
     <header></header>
     <main>
       <aside class="sidebar">
-        <div><router-link class="nav-link" to="/preparation">Preparation</router-link> <router-link to="/task">Task</router-link></div>
+        <div><router-link class="nav-link" to="/preparation">Подготовка</router-link> <router-link to="/experiment">Проведение</router-link></div>
       </aside>
       <div class="content">
         <div>

@@ -6,6 +6,7 @@ import PlanningArea from '@/components/PlanningArea';
 import Planning from '@/components/Planning';
 import Conduct from '@/components/Conduct';
 import Processing from '@/components/Processing';
+import Experiment from '@/components/Experiment';
 
 Vue.use(Router);
 
@@ -40,6 +41,11 @@ export default new Router({
       path: '/processing',
       name: 'Processing',
       component: Processing,
+    },
+    {
+      path: '/experiment',
+      name: 'Experiment',
+      component: Experiment,
     },
   ],
 });
