@@ -64,12 +64,7 @@ export default {
   props: {},
   methods: {
     save_points: function (e) {
-      this.$store.dispatch("changePPoints", [
-        [this.points[0][0], this.points[0][1]],
-        [this.points[1][0], this.points[1][1]],
-        [this.points[2][0], this.points[2][1]],
-        [this.points[3][0], this.points[3][1]],
-      ]);
+      this.$store.dispatch("changePPoints", this.points);
       this.$store.dispatch("changePPointsLen", this.number_of_points);
       this.$store.dispatch("changeNExperiments", this.number_of_experiments);
     },
