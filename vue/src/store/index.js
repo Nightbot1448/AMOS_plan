@@ -9,7 +9,6 @@ export const store = new Vuex.Store({
         p_points: null,  //planning points
         p_points_len: null,
         number_of_experiments: null,
-        randomization: false,
         experiments_data: null,
     },
     mutations: {
@@ -27,9 +26,6 @@ export const store = new Vuex.Store({
         },
         change_number_of_experiments(state, new_number_of_experiments) {
             state.number_of_experiments = new_number_of_experiments;
-        },
-        change_randomization(state, new_randomization) {
-            state.randomization = new_randomization;
         },
         change_experiments_data(state, new_experiments_data) {
             state.experiments_data = new_experiments_data;
@@ -51,9 +47,6 @@ export const store = new Vuex.Store({
         number_of_experiments(state) {
             return state.number_of_experiments
         },
-        randomization(state) {
-            return state.randomization
-        },
         experiments_data(state) {
             return state.experiments_data
         },
@@ -73,9 +66,6 @@ export const store = new Vuex.Store({
         },
         changeNExperiments({ commit }, new_number_of_experiments) {
             commit('change_number_of_experiments', new_number_of_experiments)
-        },
-        changeRandomization({ commit }, new_randomization) {
-            commit('change_randomization', new_randomization)
         },
         changeExpData({ commit }, new_experiments_data) {
             commit('change_experiments_data', new_experiments_data)

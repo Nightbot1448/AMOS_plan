@@ -69,18 +69,13 @@ export default {
   methods: {
     save_points: function (e) {
       this.$store.dispatch("changePPoints", [
-        [x1.value, y1.value],
-        [x2.value, y2.value],
-        [x3.value, y3.value],
-        [x4.value, y4.value],
+        [this.x1, this.y1],
+        [this.x2, this.y2],
+        [this.x3, this.y3],
+        [this.x4, this.y4],
       ]);
-      console.log(this.$store.getters.p_points);
-      this.$store.dispatch("changePPointsLen", number_of_points.value);
-      console.log(this.$store.getters.p_points_len);
-      this.$store.dispatch("changeNExperiments", number_of_experiments.value);
-      console.log(this.$store.getters.number_of_experiments);
-      this.$store.dispatch("changeRandomization", randomization.value);
-      console.log(this.$store.getters.randomization);
+      this.$store.dispatch("changePPointsLen", this.number_of_points);
+      this.$store.dispatch("changeNExperiments", this.number_of_experiments);
     },
   },
 };

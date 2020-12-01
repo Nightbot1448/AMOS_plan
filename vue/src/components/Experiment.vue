@@ -30,7 +30,7 @@ export default {
   props: {},
   methods: {
     save_points: function (e) {
-      this.$store.dispatch("changeExpData", self.experiments_data);
+      this.$store.dispatch("changeExpData", this.experiments_data);
     },
   },
 };

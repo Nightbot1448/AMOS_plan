@@ -21,7 +21,7 @@ export default {
   props: {},
   methods: {
     save_variant: function (e) {
-      this.$store.dispatch("changeVariant", variant.value);
+      this.$store.dispatch("changeVariant", this.variant);
     },
   },
 };

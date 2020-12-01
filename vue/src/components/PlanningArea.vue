@@ -42,8 +42,8 @@ export default {
   methods: {
     save_points: function (e) {
       this.$store.dispatch("changePAPoints", [
-        [x1c.value, x1i.value],
-        [x2c.value, x2i.value],
+        [this.x1c, this.x1i],
+        [this.x2c, this.x2i],
       ]);
     },
   },
