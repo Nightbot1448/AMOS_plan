@@ -1,5 +1,9 @@
 from flask import Flask, render_template
+from api import bp as api_blueprint
+
 app = Flask(__name__, static_folder="./../static/", template_folder="./../template/")
+app.register_blueprint(api_blueprint)
+
 
 @app.route('/')
 def index():
