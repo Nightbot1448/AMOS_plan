@@ -40,10 +40,6 @@
       <input id="number_of_experiments" type="number" name="number_of_experiments" v-model="number_of_experiments" />
     </p>
     <p>
-      <label for="randomization">Включить рандомизацию опытов?</label>
-      <input id="randomization" v-model="randomization" type="bool" name="randomization" />
-    </p>
-    <p>
       <button @click="save_points">Сохранить</button>
     </p>
   </div>
@@ -69,10 +65,10 @@ export default {
   methods: {
     save_points: function (e) {
       this.$store.dispatch("changePPoints", [
-        [this.x1, this.y1],
-        [this.x2, this.y2],
-        [this.x3, this.y3],
-        [this.x4, this.y4],
+        [this.points[0][0], this.points[0][1]],
+        [this.points[1][0], this.points[1][1]],
+        [this.points[2][0], this.points[2][1]],
+        [this.points[3][0], this.points[3][1]],
       ]);
       this.$store.dispatch("changePPointsLen", this.number_of_points);
       this.$store.dispatch("changeNExperiments", this.number_of_experiments);
