@@ -51,6 +51,8 @@ class GeneratorApi():
             self.model.additional_experiment()
             self.user_state = UserState.additional_completed
             additional_experiment = self.model.y_vals[-1]
+        
+        self.model.adequacy_check(0.05)
 
         self.results = self.model.get_results()
         self.user_state += 1
