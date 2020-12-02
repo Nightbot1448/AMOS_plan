@@ -37,7 +37,7 @@ def check_planning_area():
 
     error = True if planning_area is invalid else False
     """
-    planning_area = json.loads(request.form.get('pa_points', '[[]]'))
+    planning_area = request.json['data']['pa_points']
     if is_valid_planning_area(planning_area):
         USER['planning_area'] = planning_area
         valid_planning_area = True

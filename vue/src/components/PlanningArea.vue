@@ -21,13 +21,15 @@
         </tr>
       </tbody>
     </table>
-    <button @click="save_points">Сохранить</button>
+    <button @click="send_points">Сохранить</button>
     <router-link class="nav-link" to="/planning">Далее</router-link>
   </div>
 </template>
 
 <script>
 /* eslint-disable */
+import axios from "axios";
+
 export default {
   created() {},
   data() {
@@ -36,6 +38,7 @@ export default {
       x1i: 20,
       x2c: 0,
       x2i: 10,
+      endpoint: "http://127.0.0.1:5000/api/check/planning_area",
     };
   },
   props: {},
@@ -45,6 +48,27 @@ export default {
         [this.x1c, this.x1i],
         [this.x2c, this.x2i],
       ]);
+    },
+    send_points: function (e) {
+      const form = new FormData();
+      form.append("pa_points", [
+        [this.x1c, this.x1i],
+        [this.x2c, this.x2i],
+      ]);
+      axios
+        .post(this.endpoint, {
+          data: {
+            pa_points: [
+              [this.x1c, this.x1i],
+              [this.x2c, this.x2i],
+            ],
+          },
+        })
+        .then((response) => {})
+        .catch((error) => {
+          console.log("-----error-------");
+          console.log(error);
+        });
     },
   },
 };

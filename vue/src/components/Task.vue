@@ -18,7 +18,7 @@ export default {
     return {
       variant: 2,
       help: null,
-      endpoint: "localhost:5000/check/task",
+      endpoint: "http://127.0.0.1:5000/api/check/task",
     };
   },
   props: {},
@@ -29,9 +29,7 @@ export default {
     send_variant: function (e) {
       axios
         .get(this.endpoint, { params: { task_id: this.variant } })
-        .then((response) => {
-          console.log(response.message);
-        })
+        .then((response) => {})
         .catch((error) => {
           console.log("-----error-------");
           console.log(error);
