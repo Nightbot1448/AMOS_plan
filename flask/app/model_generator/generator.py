@@ -333,12 +333,12 @@ class FullFactorModel:
 
 
 MODEL_TASKS = {
-    1: FullFactorModel.variant_1,
-    2: FullFactorModel.variant_2,
-    3: FullFactorModel.variant_3,
-    4: FullFactorModel.variant_4,
-    5: FullFactorModel.variant_5,
-    6: FullFactorModel.variant_6,
+    '1': FullFactorModel.variant_1,
+    '2': FullFactorModel.variant_2,
+    '3': FullFactorModel.variant_3,
+    '4': FullFactorModel.variant_4,
+    '5': FullFactorModel.variant_5,
+    '6': FullFactorModel.variant_6,
 }
 
 
