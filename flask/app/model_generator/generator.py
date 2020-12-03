@@ -1,6 +1,6 @@
 import numpy as np
-import statistical_tests
-import debug_output
+from . import statistical_tests
+from . import debug_output
 
 class FullFactorModel:
     def variant_1(self):
@@ -330,6 +330,17 @@ class FullFactorModel:
     
     def get_results(self):
         return self.__results
+
+
+MODEL_TASKS = {
+    1: FullFactorModel.variant_1,
+    2: FullFactorModel.variant_2,
+    3: FullFactorModel.variant_3,
+    4: FullFactorModel.variant_4,
+    5: FullFactorModel.variant_5,
+    6: FullFactorModel.variant_6,
+}
+
 
 if __name__ == '__main__':
     np.set_printoptions(suppress=True)

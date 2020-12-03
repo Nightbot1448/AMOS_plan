@@ -1,5 +1,5 @@
 import numpy as np
-from critical_stat_values import cochrain, student, fisher
+from .critical_stat_values import cochrain, student, fisher
 
 def cochrain_test(prac_cochrain, df_numerator, df_denominator, p_value=0.01):
     numerator_idx, denominator_idx = None, None
