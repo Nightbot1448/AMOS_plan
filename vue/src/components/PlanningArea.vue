@@ -11,13 +11,13 @@
       <tbody>
         <tr>
           <th scope="row">Фактор X1</th>
-          <td><input type="number" step="0.01" v-model="x1c" id="x1c" /></td>
-          <td><input type="number" step="0.01" v-model="x1i" id="x1i" /></td>
+          <td><input type="number" step="0.01" v-model.number="x1c" /></td>
+          <td><input type="number" step="0.01" v-model.number="x1i" /></td>
         </tr>
         <tr>
           <th scope="row">Фактор X2</th>
-          <td><input type="number" step="0.01" v-model="x2c" id="x2c" /></td>
-          <td><input type="number" step="0.01" v-model="x2i" id="x2i" /></td>
+          <td><input type="number" step="0.01" v-model.number="x2c" /></td>
+          <td><input type="number" step="0.01" v-model.number="x2i" /></td>
         </tr>
       </tbody>
     </table>
@@ -50,11 +50,6 @@ export default {
       ]);
     },
     send_points: function (e) {
-      const form = new FormData();
-      form.append("pa_points", [
-        [this.x1c, this.x1i],
-        [this.x2c, this.x2i],
-      ]);
       axios
         .post(this.endpoint, {
           data: {

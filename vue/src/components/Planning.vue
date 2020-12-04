@@ -2,7 +2,7 @@
   <div>
     <p>
       <label for="number_of_points">Сколько точек должно быть в спектре плана?</label>
-      <input id="number_of_points" type="number" v-model="number_of_points" />
+      <input id="number_of_points" type="number" v-model.number="number_of_points" />
     </p>
     <button @click="send_number_of_points">Проверить</button>
     {{ answer }}

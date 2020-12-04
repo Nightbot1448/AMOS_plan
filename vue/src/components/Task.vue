@@ -2,7 +2,7 @@
   <div>
     <p>
       <label for="variant">Номер варианта задания</label>
-      <input id="variant" v-model="variant" type="number" name="variant" />
+      <input id="variant" v-model.number="variant" type="number" name="variant" />
       <button @click="send_variant">Сохранить</button>
     </p>
     <router-link class="nav-link" to="/planning_area">Далее</router-link>
