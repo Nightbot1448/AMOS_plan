@@ -119,7 +119,7 @@ def check_factor_point():
 
     error = True if factor_point is invalid else False
     """
-    if not USER.plan_points:
+    if USER.plan_points is None:
         return jsonify(dict(data={}, message="Plan_points and number_experiment aren't set", error=True))
 
     if USER.factor_point_index == 2:
