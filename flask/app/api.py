@@ -4,6 +4,7 @@ import numpy as np
 import json
 
 from model_generator import utils
+from model_generator.userState import UserState
 from model_generator.generator import FullFactorModel
 from api_user import APIUser
 
@@ -20,7 +21,8 @@ def check_task():
     error = True if task_id is invalid else False
     """
     task_id = request.args.get('task_id', None)
-    
+
+    USER.reset()
     valid_task_id = utils.is_valid_task_id(task_id)
     if valid_task_id: USER.task = utils.get_model_by_task_id(task_id)
 
@@ -38,12 +40,14 @@ def check_planning_area():
 
     error = True if planning_area is invalid else False
     """
+    USER.set_state(UserState.init_completed)
+    
     if not USER.task:
         return jsonify(dict(data={}, message="Task_id isn't set", error=True))
 
     planning_area = utils.get_from_request_json(request.json, 'pa_points', [])
     valid_planning_area = utils.is_valid_planning_area(planning_area)
-    if valid_planning_area: USER.planning_area = planning_area
+    USER.planning_area = planning_area if valid_planning_area else None
    
     return jsonify({
         'data': {},
@@ -59,12 +63,14 @@ def check_plan_points_number():
 
     error = True if plan_points_number is invalid else False
     """
+    USER.set_state(UserState.init_completed)
+    
     if not USER.planning_area:
         return jsonify(dict(data={}, message="Planning_area isn't set", error=True))
 
     plan_points_number = utils.get_from_request_json(request.json, 'plan_points_number', 0)
     valid_plan_points_number = utils.is_valid_plan_points_number(plan_points_number)
-    if valid_plan_points_number: USER.plan_points_number = plan_points_number
+    USER.plan_points_number = plan_points_number if valid_plan_points_number else None
    
     return jsonify({
         'data': {},
@@ -80,12 +86,19 @@ def check_plan_points():
 
     error = True if plan_points or number_experiment is invalid else False
     """
+    def reset():
+        USER.plan_points = None
+        USER.experiments_number = None
+    
+    USER.set_state(UserState.init_completed)
+    
     if not USER.plan_points_number:
         return jsonify(dict(data={}, message="Plan_points_number isn't set", error=True))
     
     plan_points = utils.get_from_request_json(request.json, 'plan_points', [])
     valid_plan_points = utils.is_valid_plan_points(plan_points)
-    if not valid_plan_points: 
+    if not valid_plan_points:
+        reset()
         return jsonify({
             'data': {},
             'message': '' if valid_plan_points else 'Invalid plan_points {}'.format(plan_points),
@@ -94,7 +107,8 @@ def check_plan_points():
 
     experiments_number = utils.get_from_request_json(request.json, 'number_of_experiments', 0)
     valid_experiments_number = utils.is_valid_experiments_number(experiments_number)
-    if not valid_experiments_number: 
+    if not valid_experiments_number:
+        reset()
         return jsonify({
             'data': {},
             'message': '' if valid_experiments_number else 'Invalid experiments_number {}'.format(experiments_number),
@@ -109,7 +123,7 @@ def check_plan_points():
 
     print(USER.model.y_vals)
 
-    return jsonify(dict(data={}, message=str(USER.model), error=False))
+    return jsonify(dict(data={}, message='', error=False))
 
 
 @bp.route('/check/factor_point', methods=['POST'])
@@ -119,12 +133,10 @@ def check_factor_point():
 
     error = True if factor_point is invalid else False
     """
+    USER.set_state(UserState.init_completed)
+    
     if USER.plan_points is None:
         return jsonify(dict(data={}, message="Plan_points and number_experiment aren't set", error=True))
-
-    if USER.factor_point_index == 2:
-        # reset USER.factor_point_index ?
-        return jsonify(dict(data={'y_vals': USER.model.y_vals.tolist()}, message = '', error=False))
 
     factor_point = utils.get_from_request_json(request.json, 'factor_point', [])
     valid_factor_point, index = utils.is_valid_factor_point(factor_point, USER.planning_area, USER.plan_points[0])
@@ -135,13 +147,25 @@ def check_factor_point():
             'error': not valid_factor_point        
         })
 
+    y_val = USER.model.y_vals[0][USER.factor_point_index]
     USER.factor_point_index += 1
-    if USER.factor_point_index == 2:
-        # reset USER.factor_point_index ?
+    USER.set_state(UserState.main_experiment if USER.factor_point_index == 2 else UserState.init_completed)
+    USER.factor_point_index %= 2
+    return jsonify(dict(data={'y': y_val}, message = '', error=False))
+
+
+@bp.route('/get/factor_points', methods=['GET'])
+def get_factor_point():
+    """
+    Check that user entered first factor_points, and return y_vals[i]
+
+    error = True if first factor_points don't exist
+    """
+    if USER.state == UserState.main_experiment:
         return jsonify(dict(data={'y_vals': USER.model.y_vals.tolist()}, message = '', error=False))
-    else: 
-        return jsonify(dict(data={'y': USER.model.y_vals[0][USER.factor_point_index]}, message = '', error=False))
-    
+    else:
+        return jsonify(dict(data={}, message = "Your didn't enter first factor_points", error=True))
+
 
 @bp.after_request
 def after_request(response):
