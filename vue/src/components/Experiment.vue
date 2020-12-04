@@ -1,13 +1,24 @@
 <template>
   <div>
   <div id="factor_points">
-    <div v-for="(experiment, index) in number_of_experiments" :key="index">
-      <h3>Опыт {{ index + 1 }}</h3>
+  <div id="experiment_0">
+      <h3>Опыт 1</h3>
       <p>
-        <input type="number" v-model.number="factor_points[index][0]" />
-        <input type="number" v-model.number="factor_points[index][1]" />
-        <button @click="send_factor_point(index)">Сохранить</button> {{ answer }}
-        <p>Результат: {{y_vals[index]}}</p>
+        <input type="number" v-model.number="factor_points[0][0]" />
+        <input type="number" v-model.number="factor_points[0][1]" />
+        <button id="button_0" @click="send_factor_point(0)">Сохранить</button> {{ answer }}
+        <p>Результат: {{y_vals[0]}}</p>
+      </p>
+    </div>
+    <div id="experiment_1" style="display: none">
+      <h3>Опыт 2</h3>
+      <p>
+        <input type="number" v-model.number="factor_points[1][0]" />
+        <input type="number" v-model.number="factor_points[1][1]" />
+        <button id="button_1" @click="send_factor_point(1)">Сохранить</button> {{ answer }}
+        <p>
+          Результат: {{y_vals[1]}}
+        </p>
       </p>
     </div>
   </div>
@@ -73,10 +84,18 @@ export default {
             this.y_vals[index] = Number(response.data.data.y.toFixed(2));
             this.$forceUpdate();
           }
+          document.getElementById("button_"+index).disabled = true;
           setTimeout(function (e) {
-              document.getElementById("factor_points").style.display = "none";
-              document.getElementById("text").style.display = "block";
-            }, 2000);
+              if (index == 0){
+                document.getElementById("experiment_0").style.display = "none";
+                document.getElementById("experiment_1").style.display = "block";
+              }
+              else{
+                document.getElementById("experiment_1").style.display = "none";
+                document.getElementById("text").style.display = "block";
+              }
+            }, 1500);
+            this.$forceUpdate();
         })
         .catch((error) => {
           console.log("-----error-------");
