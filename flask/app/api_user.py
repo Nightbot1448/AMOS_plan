@@ -15,6 +15,10 @@ class APIUser:
     experiments_number: int = None
     model: FullFactorModel = None
     factor_point_index: int = 0
+    means_vars: dict = {}
+    cochrain_significance: float = 0.0
+    reproduce_res: dict = {}
+    cochrain_status: int = 0
 
     def reset(self):
         self.state = UserState.start
@@ -26,5 +30,9 @@ class APIUser:
         self.experiments_number = None
         self.model = None
         self.factor_point_index = 0
+        self.means_vars = {}
+        self.reproduce_res = {}
+        self.cochrain_significance = 0
+        self.cochrain_status = 0
 
     def set_state(self, state): self.state = state
