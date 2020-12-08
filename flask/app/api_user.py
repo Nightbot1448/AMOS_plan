@@ -15,9 +15,9 @@ class APIUser:
     experiments_number: int = None
     model: FullFactorModel = None
     factor_point_index: int = 0
-    means_vars: dict = {}
+    means_vars: int = 0
     cochrain_significance: float = 0.0
-    reproduce_res: dict = {}
+    reproduce_res: int = 0
     cochrain_status: int = 0
 
     def reset(self):

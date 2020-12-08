@@ -155,7 +155,7 @@ def check_factor_point():
 
 
 @bp.route('/get/factor_points', methods=['GET'])
-def get_factor_point():
+def get_factor_points():
     """
     Check that user entered first factor_points, and return y_vals[i]
 
