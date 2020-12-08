@@ -2,7 +2,9 @@
   <div>
     <p>
       <label for="variant">Номер варианта задания</label>
-      <input id="variant" v-model.number="variant" type="number" name="variant" />
+      <select id="variant" v-model.number="variant" type="number">
+        <option v-for="(n, index) in 6" :key="index">{{ index + 1 }}</option>
+      </select>
       <button @click="send_variant">Сохранить</button>
     </p>
     <router-link class="nav-link" to="/planning_area">Далее</router-link>
