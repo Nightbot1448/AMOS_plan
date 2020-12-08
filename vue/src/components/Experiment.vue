@@ -7,7 +7,7 @@
       <p>
         <input type="number" v-model.number="factor_points[0][0]" />
         <input type="number" v-model.number="factor_points[0][1]" />
-        <button id="button_0" @click="send_factor_point(0)">Сохранить</button> <p> {{ answer }} </p>
+        <button id="button_0" @click="send_factor_point(0)">Сохранить</button> <p id="text_0"></p>
         <p>Результат: {{y_vals[0]}}</p>
       </p>
     </div>
@@ -16,7 +16,7 @@
       <p>
         <input type="number" v-model.number="factor_points[1][0]" />
         <input type="number" v-model.number="factor_points[1][1]" />
-        <button id="button_1" @click="send_factor_point(1)">Сохранить</button> {{ answer }}
+        <button id="button_1" @click="send_factor_point(1)">Сохранить</button> <p id="text_1"></p>
         <p>
           Результат: {{y_vals[1]}}
         </p>
@@ -86,6 +86,8 @@ export default {
       this.$store.dispatch("changeExpData", this.number_of_saved_points);
     },
     send_factor_point: function (index) {
+      document.getElementById("text_0").innerText = "";
+      document.getElementById("text_1").innerText = "";
       axios
         .post(this.endpoints[0], {
           data: {
@@ -94,7 +96,12 @@ export default {
         })
         .then((response) => {
           if (response.data.error) {
-            this.answer = response.data.message;
+            if (index == 0){
+              document.getElementById("text_0").innerText = response.data.message;
+            }
+            else {
+              document.getElementById("text_1").innerText = response.data.message;
+            }
           } else {
             this.number_of_saved_points++;
             this.save_number_of_points()
@@ -105,6 +112,7 @@ export default {
                 if (index == 0){
                   document.getElementById("experiment_0").style.display = "none";
                   document.getElementById("experiment_1").style.display = "block";
+                  this.message = ""
                 }
                 else{
                   document.getElementById("experiment_1").style.display = "none";
