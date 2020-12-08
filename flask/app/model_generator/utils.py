@@ -26,7 +26,7 @@ def is_valid_plan_points(plan_points, plan_points_number=4):
     return len(set((tuple(point) for point in plan_points if all(map(lambda x: x in (-1, 1), point))))) == len(plan_points) == plan_points_number
 
 
-def is_valid_experiments_number(experiments_number): return 0 < experiments_number < 10
+def is_valid_experiments_number(experiments_number): return 2 <= experiments_number <= 5
 
 
 def equal_float(a, b, max_diff_percent=0.01): return abs(a-b)/a < max_diff_percent
