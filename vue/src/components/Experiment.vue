@@ -1,5 +1,6 @@
 <template>
   <div>
+  <div id="alerts"></div>
   <div id="factor_points">
   <div id="experiment_0">
       <h3>Опыт 1</h3>
@@ -54,10 +55,20 @@
 <script>
 import axios from "axios";
 export default {
-  created() {},
+  mounted() {
+    console.log(this.$store.state.experiments_data)
+    if (this.$store.state.experiments_data != undefined){
+      this.number_of_saved_points = this.$store.state.experiments_data;
+      
+    }
+    if (this.number_of_saved_points >= 2){
+      document.getElementById("alerts").innerHTML += "<h2>Точки уже были заданы ранее. Ввод новых точек приведет к пересчету основного эксперимента.</h2>"
+      this.number_of_saved_points = 0
+    }
+  },
   data() {
     return {
-      endpoint: "http://127.0.0.1:5000/api/check/factor_point",
+      endpoints: ["http://127.0.0.1:5000/api/check/factor_point", "http://127.0.0.1:5000/api/get/factor_points"],
       number_of_experiments: 2,
       factor_points: [
         [10, 10],
@@ -66,13 +77,17 @@ export default {
       ],
       y_vals: [0, 0, 0],
       answer: "",
+      number_of_saved_points: 0,
     };
   },
   props: {},
   methods: {
+    save_number_of_points: function (e) {
+      this.$store.dispatch("changeExpData", this.number_of_saved_points);
+    },
     send_factor_point: function (index) {
       axios
-        .post(this.endpoint, {
+        .post(this.endpoints[0], {
           data: {
             factor_point: this.factor_points[index],
           },
@@ -81,6 +96,8 @@ export default {
           if (response.data.error) {
             this.answer = response.data.data.message;
           } else {
+            this.number_of_saved_points++;
+            this.save_number_of_points()
             this.y_vals[index] = Number(response.data.data.y.toFixed(2));
             this.$forceUpdate();
           }
@@ -104,11 +121,7 @@ export default {
     },
     show_results: function (e) {
       axios
-        .post(this.endpoint, {
-          data: {
-            factor_point: "",
-          },
-        })
+        .get(this.endpoints[1])
         .then((response) => {
           if (response.data.error) {
             this.answer = response.data.data.message;
