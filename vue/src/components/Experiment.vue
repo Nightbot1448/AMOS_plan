@@ -7,7 +7,7 @@
       <p>
         <input type="number" v-model.number="factor_points[0][0]" />
         <input type="number" v-model.number="factor_points[0][1]" />
-        <button id="button_0" @click="send_factor_point(0)">Сохранить</button> {{ answer }}
+        <button id="button_0" @click="send_factor_point(0)">Сохранить</button> <p> {{ answer }} </p>
         <p>Результат: {{y_vals[0]}}</p>
       </p>
     </div>
@@ -94,25 +94,25 @@ export default {
         })
         .then((response) => {
           if (response.data.error) {
-            this.answer = response.data.data.message;
+            this.answer = response.data.message;
           } else {
             this.number_of_saved_points++;
             this.save_number_of_points()
             this.y_vals[index] = Number(response.data.data.y.toFixed(2));
             this.$forceUpdate();
+            document.getElementById("button_"+index).disabled = true;
+            setTimeout(function (e) {
+                if (index == 0){
+                  document.getElementById("experiment_0").style.display = "none";
+                  document.getElementById("experiment_1").style.display = "block";
+                }
+                else{
+                  document.getElementById("experiment_1").style.display = "none";
+                  document.getElementById("text").style.display = "block";
+                }
+              }, 1500);
+              this.$forceUpdate();
           }
-          document.getElementById("button_"+index).disabled = true;
-          setTimeout(function (e) {
-              if (index == 0){
-                document.getElementById("experiment_0").style.display = "none";
-                document.getElementById("experiment_1").style.display = "block";
-              }
-              else{
-                document.getElementById("experiment_1").style.display = "none";
-                document.getElementById("text").style.display = "block";
-              }
-            }, 1500);
-            this.$forceUpdate();
         })
         .catch((error) => {
           console.log("-----error-------");
