@@ -14,7 +14,24 @@
         Показать
       </button>
     </div>
-    <div id="mean_var_table" style="display: none"></div>
+    <div id="mean_var_table" style="display: none">
+      <table border="2" class="table table-responsive">
+        <thead>
+          <tr>
+            <th scope="col">Точка ФП</th>
+            <th scope="col">Среднее значение</th>
+            <th scope="col">Оценка дисперсии</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(n, index) in means.length" :key="index">
+            <th scope="row">Точка {{ index + 1 }}</th>
+            <td>{{ Number(means[index].toFixed(2)) }}</td>
+            <td>{{ Number(means[index].toFixed(2)) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -29,7 +46,7 @@ export default {
       vars: [0],
       endpoints: [
         "http://127.0.0.1:5000/api/check/mean_var",
-        "http://127.0.0.1:5000/api/check/means_vars",
+        "http://127.0.0.1:5000/api/get/means_vars",
       ],
     };
   },
@@ -46,6 +63,7 @@ export default {
         .then((response) => {
           if (response.data.message === "") {
             document.getElementById("data").style.display = "none";
+            document.getElementById("data_p").style.display = "none";
             document.getElementById("correct_data").style.display = "block";
             document.getElementById("show_result").style.display = "block";
           } else {
@@ -57,20 +75,23 @@ export default {
           console.log(error);
         });
     },
-    send_means_vars: function (e) {
+    show_results: function (e) {
       axios
-        .post(this.endpoints[1], {
-          data: {
-            plan_points_number: this.number_of_points,
-          },
+        .get(this.endpoints[1])
+        .then((response) => {
+          if (response.data.message === "") {
+            this.means = response.data.data.means;
+            this.vars = response.data.data.vars;
+            document.getElementById("mean_var_table").style.display = "block";
+          } else {
+            //document.getElementById("data_p").style.display = "block";
+          }
         })
-        .then((response) => {})
         .catch((error) => {
           console.log("-----error-------");
           console.log(error);
         });
     },
-    show_results: function (e) {},
   },
 };
 </script>
