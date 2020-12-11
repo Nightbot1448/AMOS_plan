@@ -180,7 +180,10 @@ def check_mean_var():
         
         mean = utils.get_from_request_json(request.json, 'mean', 0)
         var = utils.get_from_request_json(request.json, 'var', 0)
-        
+        # Delete this
+        print(means[0])
+        print(vars[0])
+
         if not utils.is_valid_mean(mean, means[0]): # how to compare 0 and 0?
             return jsonify(dict(data={}, message = "Mean is invalid ({})".format(mean), error=True))
         if not utils.is_valid_var(var,vars[0]):
@@ -189,7 +192,7 @@ def check_mean_var():
         y_prac_mean, y_prac_var = USER.model.points_mean_var()
         USER.means_vars = dict(means=y_prac_mean.tolist(), vars=y_prac_var.tolist())
 
-        return jsonify(dict(data={}, message = 'Var and mean are valid', error=False))
+        return jsonify(dict(data={}, message = '', error=False))
 
 
 @bp.route('/get/means_vars', methods=['GET'])
@@ -235,10 +238,10 @@ def check_cochrain():
     if USER.reproduce_res: # when we reset it?
         cochrain = utils.get_from_request_json(request.json, 'cochrain', 0)
         if utils.is_valid_cochrain(cochrain, USER.reproduce_res['cochrain']):
+            USER.cochrain_status = 1
             return jsonify(dict(data={}, message = 'Тут могла быть таблица для Кохрана, но её не завезли', error=False))
         else:
             return jsonify(dict(data={}, message = "Сochrain is invalid ({})".format(cochrain), error=True))
-        USER.cochrain_status = 1
         return jsonify(dict(data={}, message = '', error=False))
     else:   
         return jsonify(dict(data={}, message = "Your didn't set significance level", error=True))
@@ -274,7 +277,7 @@ def check_reproducible():
     if USER.cochrain_status > 2:
         USER.cochrain_status = 4
         is_reproducible = utils.get_from_request_json(request.json, 'is_reproducible')
-        if is_reproducible == USER.reproduce_res['cochrain']['crit_value']['is_reproducible']:
+        if is_reproducible == USER.reproduce_res['is_reproducible']:
             return jsonify(dict(data={}, message = '', error=False))
         else:
             return jsonify(dict(data={}, message = "is_reproducible is invalid ({})".format(is_reproducible), error=True))
@@ -287,7 +290,7 @@ def check_reproducible_var():
     if USER.cochrain_status > 3:
         USER.cochrain_status = 5
         reproducible_var = utils.get_from_request_json(request.json, 'reproducible_var')
-        if not utils.is_valid_anything(reproducible_var, USER.reproduce_res['reproducible_var']):
+        if not utils.is_valid_anything(reproducible_var, USER.reproduce_res['reproducibility_var']):
             return jsonify(dict(data={}, message = "Reproducible_var is invalid ({})".format(reproducible_var), error=True))
         return jsonify(dict(data={}, message = '', error=False))
     else:   
