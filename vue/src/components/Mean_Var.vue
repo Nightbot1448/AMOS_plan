@@ -27,7 +27,7 @@
           <tr v-for="(n, index) in means.length" :key="index">
             <th scope="row">Точка {{ index + 1 }}</th>
             <td>{{ Number(means[index].toFixed(2)) }}</td>
-            <td>{{ Number(means[index].toFixed(2)) }}</td>
+            <td>{{ Number(vars[index].toFixed(2)) }}</td>
           </tr>
         </tbody>
       </table>
