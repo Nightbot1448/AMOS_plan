@@ -4,7 +4,7 @@
       <b-row>
         <b-col cols="2"></b-col>
         <b-col cols="8" align="center">
-          <b-card align="center">
+          <b-card align="center" class="mt-3">
             <h3>Номер варианта задания</h3>
             <b-form-select id="variant" v-model.number="variant" type="number">
               <option v-for="(n, index) in 6" :key="index">
@@ -17,6 +17,7 @@
               >
             </div>
           </b-card>
+          <b-alert class="mt-2" variant="success" :show="answer">Вариант выбран.</b-alert>
           <div class="mb-5 mt-5">
             <b-button variant="secondary" to="/planning_area">Далее</b-button>
           </div>
@@ -47,7 +48,7 @@ export default {
   data() {
     return {
       variant: 2,
-      help: null,
+      answer: false,
       endpoint: "http://127.0.0.1:5000/api/check/task",
     };
   },
@@ -59,7 +60,11 @@ export default {
     send_variant: function (e) {
       axios
         .get(this.endpoint, { params: { task_id: this.variant } })
-        .then((response) => {})
+        .then((response) => {
+          if (response.data.message === "") {
+            this.answer = true;
+          }
+        })
         .catch((error) => {
           console.log("-----error-------");
           console.log(error);

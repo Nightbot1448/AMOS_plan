@@ -17,7 +17,6 @@
               <b-button @click="send_number_of_points" variant="primary"
                 >Проверить</b-button
               >
-              {{ answer }}
             </div>
             <div id="set_points" style="display: none">
               <table class="table table-borderless table-responsive">
@@ -53,9 +52,20 @@
                 <input type="number" v-model.number="experiments_number" />
               </p>
               <b-button @click="send_plan_points" variant="primary">Сохранить</b-button>
-              {{ answer2 }}
             </div>
           </b-card>
+          <b-alert class="mt-2" variant="success" :show="answer ? true : false">{{
+            answer
+          }}</b-alert>
+          <b-alert class="mt-2" variant="danger" :show="error ? true : false">{{
+            error
+          }}</b-alert>
+          <b-alert class="mt-2" variant="success" :show="answer2 ? true : false">{{
+            answer2
+          }}</b-alert>
+          <b-alert class="mt-2" variant="danger" :show="error2 ? true : false">{{
+            error2
+          }}</b-alert>
         </b-col>
       </b-row>
     </b-container>
@@ -103,7 +113,9 @@ export default {
         "http://127.0.0.1:5000/api/check/plan_points_and_number_experiment",
       ],
       answer: "",
+      error: "",
       answer2: "",
+      error2: "",
       number_of_points: 4,
       points: [
         [1, 1],
@@ -125,12 +137,12 @@ export default {
         })
         .then((response) => {
           if (response.data.message === "") {
-            this.answer = "Правильно!";
+            this.answer = "Количество точек в спектре плана указано верно.";
             setTimeout(function (e) {
               document.getElementById("set_points_number").style.display = "none";
               document.getElementById("set_points").style.display = "block";
             }, 2000);
-          } else this.answer = response.data.message;
+          } else this.error = response.data.message;
         })
         .catch((error) => {
           console.log("-----error-------");
@@ -148,7 +160,7 @@ export default {
         .then((response) => {
           if (response.data.message === "") {
             this.answer2 = "Сохранено!";
-          } else this.answer2 = response.data.message;
+          } else this.error2 = response.data.message;
         })
         .catch((error) => {
           console.log("-----error-------");

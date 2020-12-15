@@ -30,6 +30,8 @@
     <div class="mt-3">
     <b-button @click="send_points" size="lg" variant="primary">Сохранить</b-button></div>
     </b-card>
+    <b-alert class="mt-2" variant="success" :show="answer">Область планирования успешно задана.</b-alert>
+    <b-alert class="mt-2" variant="danger" :show="error ? true : false">{{ error }}</b-alert>
     <div class="mb-5 mt-5"><b-button variant="secondary" to="/planning">Далее</b-button></div>
         </b-col>
       </b-row>
@@ -64,6 +66,8 @@ export default {
       x1i: 20,
       x2c: 0,
       x2i: 10,
+      answer: false,
+      error: "",
       endpoint: "http://127.0.0.1:5000/api/check/planning_area",
     };
   },
@@ -85,7 +89,14 @@ export default {
             ],
           },
         })
-        .then((response) => {})
+        .then((response) => {
+          if (response.data.message === "") {
+            this.answer = true;
+          }
+          else {
+            this.error = response.data.message
+          }
+        })
         .catch((error) => {
           console.log("-----error-------");
           console.log(error);
