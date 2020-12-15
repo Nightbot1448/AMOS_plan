@@ -15,6 +15,8 @@ import Processing from './components/Processing.vue';
 import { store } from './store'
 
 Vue.config.productionTip = false;
+Vue.use(BootstrapVue)
+Vue.use(IconsPlugin)
 
 /* eslint-disable no-new */
 new Vue({
