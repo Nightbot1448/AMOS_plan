@@ -1,25 +1,40 @@
 <template>
   <div>
-    <p>
-      <label for="variant">Номер варианта задания</label>
-      <select id="variant" v-model.number="variant" type="number">
-        <option v-for="(n, index) in 6" :key="index">
-          {{ index + 1 }}
-        </option>
-      </select>
-      <button @click="send_variant">Сохранить</button>
-    </p>
-    <router-link class="nav-link" to="/planning_area">Далее</router-link>
+    <b-container>
+      <b-row>
+        <b-col cols="2"></b-col>
+        <b-col cols="8">
+          <b-card align="center">
+            <h3>Номер варианта задания</h3>
+            <b-form-select id="variant" v-model.number="variant" type="number">
+              <option v-for="(n, index) in 6" :key="index">
+                {{ index + 1 }}
+              </option>
+            </b-form-select>
+            <div class="mt-3">
+              <b-button @click="send_variant" size="lg" variant="primary"
+                >Сохранить</b-button
+              >
+            </div>
+            <div class="mt-5">
+              <b-button variant="secondary" to="/planning_area">Далее</b-button>
+            </div>
+          </b-card>
+        </b-col>
+      </b-row>
+    </b-container>
     <div class="documentation">
-      <p>
-        В лабораторных работах объект, над которым проводится эксперимент, внешне
-        представляется как "черный ящик" с определенным числом независимых факторов и
-        одним откликом.
-      </p>
-      <p>
-        Конкретное число независимых факторов и функциональная связь между факторами и
-        откликом определяется вариантом задания.
-      </p>
+      <b-card bg-variant="info">
+        <p>
+          В лабораторных работах объект, над которым проводится эксперимент, внешне
+          представляется как "черный ящик" с определенным числом независимых факторов и
+          одним откликом.
+        </p>
+        <p>
+          Конкретное число независимых факторов и функциональная связь между факторами и
+          откликом определяется вариантом задания.
+        </p>
+      </b-card>
     </div>
   </div>
 </template>
