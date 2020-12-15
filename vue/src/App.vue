@@ -3,11 +3,11 @@
     <header></header>
     <main>
       <div>
-        <b-navbar>
-          <b-nav-item><router-link to="/preparation">Подготовка</router-link></b-nav-item>
-          <b-nav-item><router-link to="/experiment">Проведение</router-link></b-nav-item>
-          <b-nav-item><router-link to="/processing">Обработка</router-link></b-nav-item>
-        </b-navbar>
+        <b-nav tabs fill>
+          <b-nav-item to="/preparation" exact-active-class>Подготовка</b-nav-item>
+          <b-nav-item to="/experiment" exact-active-class>Проведение</b-nav-item>
+          <b-nav-item to="/processing" exact-active-class>Обработка</b-nav-item>
+        </b-nav>
       </div>
       <div class="content">
         <div>
