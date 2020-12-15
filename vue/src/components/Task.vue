@@ -3,7 +3,7 @@
     <b-container>
       <b-row>
         <b-col cols="2"></b-col>
-        <b-col cols="8">
+        <b-col cols="8" align="center">
           <b-card align="center">
             <h3>Номер варианта задания</h3>
             <b-form-select id="variant" v-model.number="variant" type="number">
@@ -16,10 +16,10 @@
                 >Сохранить</b-button
               >
             </div>
-            <div class="mt-5">
-              <b-button variant="secondary" to="/planning_area">Далее</b-button>
-            </div>
           </b-card>
+          <div class="mb-5 mt-5">
+            <b-button variant="secondary" to="/planning_area">Далее</b-button>
+          </div>
         </b-col>
       </b-row>
     </b-container>

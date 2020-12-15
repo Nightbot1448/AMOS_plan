@@ -1,5 +1,11 @@
 <template>
   <div>
+    <b-container>
+      <b-row>
+        <b-col cols="2"></b-col>
+        <b-col cols="8" align="center">
+          <b-card align="center">
+            <h3>Планирование эксперимента</h3>
     <table class="table table-borderless table-responsive">
       <thead>
         <tr>
@@ -21,9 +27,15 @@
         </tr>
       </tbody>
     </table>
-    <button @click="send_points">Сохранить</button>
-    <router-link class="nav-link" to="/planning">Далее</router-link>
+    <div class="mt-3">
+    <b-button @click="send_points" size="lg" variant="primary">Сохранить</b-button></div>
+    </b-card>
+    <div class="mb-5 mt-5"><b-button variant="secondary" to="/planning">Далее</b-button></div>
+        </b-col>
+      </b-row>
+    </b-container>
     <div class="documentation">
+      <b-card bg-variant="info">
       <p>
         Область планирования - область значений факторов, в которой находятся точки, отвечающие условиям проведения опытов используемого плана эксперимента. Область планирования составляет часть допустимого диапазона изменения факторов или совпадает с ним.
       </p>
@@ -35,6 +47,7 @@
         </ul>
       </p>
       <p>Вектор, компонентами которого являются упорядоченные численные значения основных уровней факторов, задает точку, являющуюся центром области планирования, в окрестности которой и располагаются все точки плана.</p>
+      </b-card>
     </div>
   </div>
 </template>
