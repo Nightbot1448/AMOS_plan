@@ -1,25 +1,21 @@
 <template>
   <div>
-    <ul>
-      <label>Воспроизводимость</label>
-      <li>
-        <router-link to="/mean_var">Средние и дисперсии</router-link>
-      </li>
-      <li>
-        <router-link to="/reproducibility"
-          >Проверка воспроизводимости (Критерий Кохрена)</router-link
+    <div>
+      <b-list-group>
+        <b-list-group-item><b>Воспроизводимость:</b></b-list-group-item>
+        <b-list-group-item to="/mean_var">Средние и дисперсии </b-list-group-item>
+        <b-list-group-item to="/reproducibility"
+          >Проверка воспроизводимости (Критерий Кохрена)
+        </b-list-group-item>
+        <b-list-group-item><b>Модель объекта:</b></b-list-group-item>
+        <b-list-group-item to="/parameter_estimation"
+          >Оценка параметров</b-list-group-item
         >
-      </li>
-      <label>Модель объекта</label>
-      <li>
-        <router-link to="/parameter_estimation">Оценка параметров</router-link>
-      </li>
-      <li>
-        <router-link to="/significance"
-          >Значимость оценок (Критерий Стьюдента)</router-link
+        <b-list-group-item to="/significance"
+          >Значимость оценок (Критерий Стьюдента)</b-list-group-item
         >
-      </li>
-    </ul>
+      </b-list-group>
+    </div>
   </div>
 </template>
 
@@ -27,17 +23,10 @@
 export default {
   created() {},
   data() {
-    return {
-      variant: 2,
-      help: null,
-    };
+    return {};
   },
   props: {},
-  methods: {
-    save_variant: function (e) {
-      this.$store.dispatch("changeVariant", this.variant);
-    },
-  },
+  methods: {},
 };
 </script>
 
