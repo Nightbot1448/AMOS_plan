@@ -7,7 +7,7 @@
       <p>
         <input type="number" v-model.number="factor_points[0][0]" />
         <input type="number" v-model.number="factor_points[0][1]" />
-        <button id="button_0" @click="send_factor_point(0)">Сохранить</button> <p id="text_0"></p>
+        <b-button id="button_0" @click="send_factor_point(0)" variant="primary">Сохранить</b-button> <p id="text_0"></p>
         <p>Результат: {{y_vals[0]}}</p>
       </p>
     </div>
@@ -16,16 +16,16 @@
       <p>
         <input type="number" v-model.number="factor_points[1][0]" />
         <input type="number" v-model.number="factor_points[1][1]" />
-        <button id="button_1" @click="send_factor_point(1)">Сохранить</button> <p id="text_1"></p>
+        <b-button id="button_1" @click="send_factor_point(1)" variant="primary">Сохранить</b-button> <p id="text_1"></p>
         <p>
           Результат: {{y_vals[1]}}
         </p>
       </p>
     </div>
   </div>
-    <div>
-      <p id="text" style="display: none">Дальше эксперимент выполняется в автоматическом режиме.</p>
-      <button @click="show_results()">Показать результаты</button>
+    <div id="text" style="display: none">
+      <p>Дальше эксперимент выполняется в автоматическом режиме.</p>
+      <b-button @click="show_results()" variant="primary">Показать результаты</b-button>
     </div>
     <div id="results" style="display: none">
       <table border="2">
@@ -50,6 +50,7 @@
     </div>
     <router-link class="nav-link" to="/planning">Далее</router-link>
     <div class="documentation">
+      <b-card bg-variant="info">
       <p>
         Результатом проведения основного эксперимента является получение значений отклика во всех точках плана, которые заносятся в таблицу, строки которой соответствуют номерам точек плана, а столбцы - номерам параллельных опытов.
       </p>
@@ -78,6 +79,7 @@ y = ( 287.96 + 287.11 + 287.79) / 3 = 287.62
 D(y)=( (287.96 - 287.62)^2 + (287.11 - 287.62)^2 + (287.79 - 287.62)^2)/(3-1) = 0.20
 
       </p>
+      </b-card>
     </div>
   </div>
 </template>

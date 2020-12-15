@@ -17,13 +17,13 @@
       <tbody>
         <tr>
           <th scope="row">Фактор X1</th>
-          <td><input type="number" step="0.01" v-model.number="x1c" /></td>
-          <td><input type="number" step="0.01" v-model.number="x1i" /></td>
+          <td><b-form-input type="number" step="0.01" v-model.number="x1c" /></td>
+          <td><b-form-input type="number" step="0.01" v-model.number="x1i" /></td>
         </tr>
         <tr>
           <th scope="row">Фактор X2</th>
-          <td><input type="number" step="0.01" v-model.number="x2c" /></td>
-          <td><input type="number" step="0.01" v-model.number="x2i" /></td>
+          <td><b-form-input type="number" step="0.01" v-model.number="x2c" /></td>
+          <td><b-form-input type="number" step="0.01" v-model.number="x2i" /></td>
         </tr>
       </tbody>
     </table>

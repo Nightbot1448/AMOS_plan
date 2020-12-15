@@ -9,12 +9,12 @@
               <label for="number_of_points"
                 >Сколько точек должно быть в спектре плана?</label
               >
-              <input
+              <b-form-input
                 id="number_of_points"
                 type="number"
                 v-model.number="number_of_points"
               />
-              <b-button @click="send_number_of_points" variant="primary"
+              <b-button class="mt-2" @click="send_number_of_points" variant="primary"
                 >Проверить</b-button
               >
             </div>
@@ -31,14 +31,14 @@
                   <tr v-for="(n, index) in number_of_points" :key="index">
                     <th scope="row">Точка {{ index + 1 }}</th>
                     <td>
-                      <input
+                      <b-form-input
                         type="number"
                         step="0.01"
                         v-model.number="points[index][0]"
                       />
                     </td>
                     <td>
-                      <input
+                      <b-form-input
                         type="number"
                         step="0.01"
                         v-model.number="points[index][1]"
@@ -49,7 +49,7 @@
               </table>
               <p>
                 <label>Количество параллельных экспериментов (не более 5)</label>
-                <input type="number" v-model.number="experiments_number" />
+                <b-form-input type="number" v-model.number="experiments_number" />
               </p>
               <b-button @click="send_plan_points" variant="primary">Сохранить</b-button>
             </div>
