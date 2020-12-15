@@ -2,13 +2,13 @@
   <div id="app">
     <header></header>
     <main>
-      <aside class="sidebar">
-        <div>
-          <router-link class="nav-link" to="/preparation">Подготовка</router-link>
-          <router-link to="/experiment">Проведение</router-link>
-          <router-link to="/processing">Обработка</router-link>
-        </div>
-      </aside>
+      <div>
+        <b-navbar>
+          <b-nav-item><router-link to="/preparation">Подготовка</router-link></b-nav-item>
+          <b-nav-item><router-link to="/experiment">Проведение</router-link></b-nav-item>
+          <b-nav-item><router-link to="/processing">Обработка</router-link></b-nav-item>
+        </b-navbar>
+      </div>
       <div class="content">
         <div>
           <router-view />
