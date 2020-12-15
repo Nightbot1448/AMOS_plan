@@ -1,54 +1,91 @@
 <template>
   <div>
-    <div id="data">
-      <input v-model.number="means[0]" type="number" />
-      <input v-model.number="vars[0]" type="number" />
-      <button @click="send_mean_var">Проверить</button>
-    </div>
-    <p id="data_p" style="display: none">Не верно.</p>
-    <div>
-      <p id="correct_data" style="display: none">
-        Данные верны. Показать остальные значения?
-      </p>
-      <button id="show_result" @click="show_results" style="display: none">
-        Показать
-      </button>
-    </div>
-    <div id="mean_var_table" style="display: none">
-      <table border="2" class="table table-responsive">
-        <thead>
-          <tr>
-            <th scope="col">Точка ФП</th>
-            <th scope="col">Среднее значение</th>
-            <th scope="col">Оценка дисперсии</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(n, index) in means.length" :key="index">
-            <th scope="row">Точка {{ index + 1 }}</th>
-            <td>{{ Number(means[index].toFixed(2)) }}</td>
-            <td>{{ Number(vars[index].toFixed(2)) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <b-container>
+      <b-row>
+        <b-col cols="2"></b-col>
+        <b-col cols="8" align="center">
+          <b-card class="mb-2 mt-2">
+            <div id="data">
+              <h3>Средние и дисперсии</h3>
+              <p>
+                Введите среднее значение отклика и оценку дисперсии отклика для точки 1.
+              </p>
+              <b-container>
+                <b-row class="ml-5">
+                  <b-col cols="4">
+                    <b-form-input v-model.number="means[0]" type="number" />
+                  </b-col>
+                  <b-col cols="4">
+                    <b-form-input v-model.number="vars[0]" type="number" />
+                  </b-col>
+                  <b-col cols="3">
+                    <b-button @click="send_mean_var" variant="primary"
+                      >Проверить</b-button
+                    >
+                  </b-col>
+                </b-row>
+              </b-container>
+            </div>
+            <div>
+              <p id="correct_data" style="display: none">
+                Данные верны. Показать остальные значения?
+              </p>
+              <b-button
+                id="show_result"
+                @click="show_results"
+                style="display: none"
+                variant="primary"
+              >
+                Показать
+              </b-button>
+            </div>
+            <div id="mean_var_table" style="display: none" class="table-responsive mt-4">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col">Точка ФП</th>
+                    <th scope="col">Среднее значение</th>
+                    <th scope="col">Оценка дисперсии</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(n, index) in means.length" :key="index">
+                    <th scope="row">Точка {{ index + 1 }}</th>
+                    <td>{{ Number(means[index].toFixed(2)) }}</td>
+                    <td>{{ Number(vars[index].toFixed(2)) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </b-card>
+          <b-alert class="mt-2" variant="danger" :show="data_p">
+            Не верно указаны дисперсия и среднее.</b-alert
+          >
+          <div class="mb-5 mt-5">
+            <b-button variant="secondary" to="/reproducibility">Далее</b-button>
+          </div>
+        </b-col>
+      </b-row>
+    </b-container>
     <div class="documentation">
-      <p>
-        Эксперимент - система воздействий и наблюдений, направленных на получение
-        информации об объекте при проведении испытаний.
-      </p>
-      <p>
-        В лабораторных работах рассматривается активный эксперимент, т.е. принято, что
-        объект исследования имеет только управляемые и контролируемые факторы, значения
-        которых можно целенаправленно изменять в ходе эксперимента в соответствии с
-        построенным планом эксперимента, а действие неуправляемых и неконтролируемых
-        факторов учитывается статистически.
-      </p>
-      <p>
-        Отдельной элементарной частью эксперимента является опыт - измерение значения
-        отклика в определенных условиях: в конретной точке плана.
-      </p>
-      <p>Уровень значимости - вероятность отвержения правильной гипотезы</p>
+      <b-card bg-variant="info">
+        <p>
+          Эксперимент - система воздействий и наблюдений, направленных на получение
+          информации об объекте при проведении испытаний.
+        </p>
+        <p>
+          В лабораторных работах рассматривается активный эксперимент, т.е. принято, что
+          объект исследования имеет только управляемые и контролируемые факторы, значения
+          которых можно целенаправленно изменять в ходе эксперимента в соответствии с
+          построенным планом эксперимента, а действие неуправляемых и неконтролируемых
+          факторов учитывается статистически.
+        </p>
+        <p>
+          Отдельной элементарной частью эксперимента является опыт - измерение значения
+          отклика в определенных условиях: в конретной точке плана.
+        </p>
+        <p>Уровень значимости - вероятность отвержения правильной гипотезы</p>
+      </b-card>
     </div>
   </div>
 </template>
@@ -62,6 +99,7 @@ export default {
     return {
       means: [0],
       vars: [0],
+      data_p: false,
       endpoints: [
         "http://127.0.0.1:5000/api/check/mean_var",
         "http://127.0.0.1:5000/api/get/means_vars",
@@ -81,11 +119,11 @@ export default {
         .then((response) => {
           if (response.data.message === "") {
             document.getElementById("data").style.display = "none";
-            document.getElementById("data_p").style.display = "none";
+            this.data_p = false;
             document.getElementById("correct_data").style.display = "block";
             document.getElementById("show_result").style.display = "block";
           } else {
-            document.getElementById("data_p").style.display = "block";
+            this.data_p = true;
           }
         })
         .catch((error) => {
@@ -102,7 +140,6 @@ export default {
             this.vars = response.data.data.vars;
             document.getElementById("mean_var_table").style.display = "block";
           } else {
-            //document.getElementById("data_p").style.display = "block";
           }
         })
         .catch((error) => {

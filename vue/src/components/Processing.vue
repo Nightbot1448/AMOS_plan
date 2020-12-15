@@ -16,6 +16,9 @@
         >
       </b-list-group>
     </div>
+    <div class="documentation">
+      <b-card bg-variant="info"> </b-card>
+    </div>
   </div>
 </template>
 
