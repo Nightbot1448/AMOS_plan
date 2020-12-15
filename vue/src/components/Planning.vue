@@ -66,6 +66,9 @@
           <b-alert class="mt-2" variant="danger" :show="error2 ? true : false">{{
             error2
           }}</b-alert>
+          <div class="mb-5 mt-5">
+            <b-button variant="secondary" to="/experiment">Далее</b-button>
+          </div>
         </b-col>
       </b-row>
     </b-container>
