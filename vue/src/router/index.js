@@ -7,6 +7,10 @@ import Planning from '@/components/Planning';
 import Conduct from '@/components/Conduct';
 import Processing from '@/components/Processing';
 import Experiment from '@/components/Experiment';
+import Mean_Var from '@/components/Mean_Var';
+import Reproducibility from '@/components/Reproducibility';
+import Parameter_estimation from '@/components/Parameter_estimation';
+import Significance from '@/components/Significance';
 
 Vue.use(Router);
 
@@ -46,6 +50,26 @@ export default new Router({
       path: '/experiment',
       name: 'Experiment',
       component: Experiment,
+    },
+    {
+      path: '/mean_var',
+      name: 'Mean_Var',
+      component: Mean_Var,
+    },
+    {
+      path: '/reproducibility',
+      name: 'Reproducibility',
+      component: Reproducibility,
+    },
+    {
+      path: '/parameter_estimation',
+      name: 'Parameter_estimation',
+      component: Parameter_estimation,
+    },
+    {
+      path: '/significance',
+      name: 'Significance',
+      component: Significance,
     },
   ],
 });

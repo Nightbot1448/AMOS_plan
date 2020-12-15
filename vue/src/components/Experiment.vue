@@ -56,7 +56,6 @@
 import axios from "axios";
 export default {
   mounted() {
-    console.log(this.$store.state.experiments_data)
     if (this.$store.state.experiments_data != undefined){
       this.number_of_saved_points = this.$store.state.experiments_data;
       

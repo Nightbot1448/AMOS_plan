@@ -331,7 +331,7 @@ class FullFactorModel:
     def get_results(self):
         return self.__results
 
-    def get_reproducibility_info():
+    def get_reproducibility_info(self):
         return {key: self.__results.get(key, None) for key in ('cochrain', 'is_reproducible', 'reproducibility_var')}
 
 

@@ -1,11 +1,25 @@
 <template>
   <div>
-    <p>
-      <label for="variant">Номер варианта задания</label>
-      <input id="variant" v-model="variant" type="number" name="variant" />
-      <button @click="save_variant">Сохранить</button>
-    </p>
-    <router-link class="nav-link" to="/planning_area">Далее</router-link>
+    <ul>
+      <label>Воспроизводимость</label>
+      <li>
+        <router-link to="/mean_var">Средние и дисперсии</router-link>
+      </li>
+      <li>
+        <router-link to="/reproducibility"
+          >Проверка воспроизводимости (Критерий Кохрена)</router-link
+        >
+      </li>
+      <label>Модель объекта</label>
+      <li>
+        <router-link to="/parameter_estimation">Оценка параметров</router-link>
+      </li>
+      <li>
+        <router-link to="/significance"
+          >Значимость оценок (Критерий Стьюдента)</router-link
+        >
+      </li>
+    </ul>
   </div>
 </template>
 
