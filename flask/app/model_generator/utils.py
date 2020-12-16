@@ -73,3 +73,6 @@ def is_valid_anything(user, calc, max_diff_percent=0.01): return equal_float(use
 
 
 def is_valid_param_num(user_num): return user_num == 4
+
+
+def is_valid_int(user, calc): return user == calc
