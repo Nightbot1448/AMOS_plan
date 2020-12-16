@@ -185,7 +185,7 @@ def check_mean_var():
         print(means[0])
         print(vars[0])
 
-        if not utils.is_valid_mean(mean, means[0]): # how to compare 0 and 0?
+        if not utils.is_valid_mean(mean, means[0]):
             return jsonify(dict(data={}, message = "Mean is invalid ({})".format(mean), error=True))
         if not utils.is_valid_var(var,vars[0]):
             return jsonify(dict(data={}, message = "Var is invalid ({})".format(mean), error=True))
@@ -240,7 +240,7 @@ def check_cochrain():
         cochrain = utils.get_from_request_json(request.json, 'cochrain', 0)
         if utils.is_valid_cochrain(cochrain, USER.reproduce_res['cochrain']):
             USER.cochrain_status = 1
-            return jsonify(dict(data=COCHRAIN_TABLES[cochrain], message = '', error=False))    #TODO: таблицы
+            return jsonify(dict(data=COCHRAIN_TABLES[cochrain], message = '', error=False))
         else:
             return jsonify(dict(data={}, message = "Сochrain is invalid ({})".format(cochrain), error=True))
     else:   
