@@ -6,7 +6,7 @@ import json
 from model_generator import utils
 from model_generator.userState import UserState
 from model_generator.generator import FullFactorModel
-from model_generator.criticalsts_values.cochraun import COCHRAIN_TABLES
+from model_generator.critical_stat_values.cochrain import COCHRAIN_TABLES
 from api_user import APIUser
 
 
