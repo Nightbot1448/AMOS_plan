@@ -1,13 +1,42 @@
 <template>
   <div>
-    <p>
-      <label for="variant">Номер варианта задания</label>
-      <select id="variant" v-model.number="variant" type="number">
-        <option v-for="(n, index) in 6" :key="index">{{ index + 1 }}</option>
-      </select>
-      <button @click="send_variant">Сохранить</button>
-    </p>
-    <router-link class="nav-link" to="/planning_area">Далее</router-link>
+    <b-container>
+      <b-row>
+        <b-col cols="2"></b-col>
+        <b-col cols="8" align="center">
+          <b-card align="center" class="mt-3">
+            <h3>Номер варианта задания</h3>
+            <b-form-select id="variant" v-model.number="variant" type="number">
+              <option v-for="(n, index) in 6" :key="index">
+                {{ index + 1 }}
+              </option>
+            </b-form-select>
+            <div class="mt-3">
+              <b-button id="save_var" @click="send_variant" size="lg" variant="primary"
+                >Сохранить</b-button
+              >
+            </div>
+          </b-card>
+          <b-alert class="mt-2" variant="success" :show="answer">Вариант выбран.</b-alert>
+          <div class="mb-5 mt-5">
+            <b-button variant="secondary" to="/planning_area">Далее</b-button>
+          </div>
+        </b-col>
+      </b-row>
+    </b-container>
+    <div class="documentation">
+      <b-card bg-variant="info">
+        <p>
+          В лабораторных работах объект, над которым проводится эксперимент, внешне
+          представляется как "черный ящик" с определенным числом независимых факторов и
+          одним откликом.
+        </p>
+        <p>
+          Конкретное число независимых факторов и функциональная связь между факторами и
+          откликом определяется вариантом задания.
+        </p>
+      </b-card>
+    </div>
   </div>
 </template>
 
@@ -19,7 +48,7 @@ export default {
   data() {
     return {
       variant: 2,
-      help: null,
+      answer: false,
       endpoint: "http://127.0.0.1:5000/api/check/task",
     };
   },
@@ -31,7 +60,12 @@ export default {
     send_variant: function (e) {
       axios
         .get(this.endpoint, { params: { task_id: this.variant } })
-        .then((response) => {})
+        .then((response) => {
+          if (response.data.message === "") {
+            this.answer = true;
+            document.getElementById("save_var").disabled = true;
+          }
+        })
         .catch((error) => {
           console.log("-----error-------");
           console.log(error);
