@@ -137,8 +137,6 @@ class FullFactorModel:
             y_vals += np.random.normal(0,self.__noise_additional, y_vals.shape)
             self.y_vals = np.vstack((self.y_vals, y_vals))
             
-            # self.y_vals = np.vstack((self.y_vals, np.array([17.26,17.26,17.26])))
-            
             self.additional_experiment_conducted = True
         else:
             print('Дополнительный эксперимент уже был проведен')
@@ -273,12 +271,14 @@ class FullFactorModel:
 
         if 'student' in self.__results.keys():
             self.__results['student'].update({
+                'model_response': self.model_response,
                 'prac_value': self.student_values(),
                 'df': df_student,
                 'crit_value': student_crit,
             })
         else:
             self.__results.update({'student': {
+                'model_response': self.model_response,
                 'prac_value': self.student_values(),
                 'df': df_student,
                 'crit_value': student_crit,
