@@ -6,6 +6,7 @@ import json
 from model_generator import utils
 from model_generator.userState import UserState
 from model_generator.generator import FullFactorModel
+from model_generator.criticalsts_values.cochraun import COCHRAIN_TABLES
 from api_user import APIUser
 
 
@@ -239,10 +240,9 @@ def check_cochrain():
         cochrain = utils.get_from_request_json(request.json, 'cochrain', 0)
         if utils.is_valid_cochrain(cochrain, USER.reproduce_res['cochrain']):
             USER.cochrain_status = 1
-            return jsonify(dict(data={}, message = 'Тут могла быть таблица для Кохрана, но её не завезли', error=False))
+            return jsonify(dict(data=COCHRAIN_TABLES[cochrain], message = '', error=False))    #TODO: таблицы
         else:
             return jsonify(dict(data={}, message = "Сochrain is invalid ({})".format(cochrain), error=True))
-        return jsonify(dict(data={}, message = '', error=False))
     else:   
         return jsonify(dict(data={}, message = "Your didn't set significance level", error=True))
 
