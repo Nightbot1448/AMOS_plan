@@ -4,7 +4,7 @@
       <b-row>
         <b-col cols="2"></b-col>
         <b-col cols="8" align="center">
-          <b-card align="center" class="mt-3">
+          <b-card class="mb-2 mt-2">
             <h3>Номер варианта задания</h3>
             <b-form-select id="variant" v-model.number="variant" type="number">
               <option v-for="(n, index) in 6" :key="index">

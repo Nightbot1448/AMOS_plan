@@ -4,7 +4,7 @@
       <b-row>
         <b-col cols="2"></b-col>
         <b-col cols="8" align="center">
-          <b-card align="center">
+          <b-card class="mb-2 mt-2">
             <h3>Планирование эксперимента</h3>
     <table class="table table-borderless table-responsive">
       <thead>

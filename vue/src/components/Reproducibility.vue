@@ -339,9 +339,6 @@ export default {
             document.getElementById("reproducible_var").style.display = "none";
             document.getElementById("results").style.display = "block";
             document.getElementById("reproducible_var_answer").innerText = "Правильно.";
-            setTimeout({
-
-            }, 1500)
           } else {
             document.getElementById("reproducible_var_answer").innerText = "Неправильно.";
           }
