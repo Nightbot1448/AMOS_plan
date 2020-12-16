@@ -55,7 +55,7 @@
             </div>
             <div id="text" style="display: none">
               <p>Дальше эксперимент выполняется в автоматическом режиме.</p>
-              <b-button @click="show_results()" variant="primary"
+              <b-button id="show_res" @click="show_results()" variant="primary"
                 >Показать результаты</b-button
               >
             </div>
@@ -296,6 +296,7 @@ export default {
             this.answer = response.data.data.message;
           } else {
             this.y_vals = response.data.data.y_vals;
+            document.getElementById("show_res").disabled = true;
           }
           document.getElementById("factor_points").style.display = "none";
           document.getElementById("results").style.display = "block";

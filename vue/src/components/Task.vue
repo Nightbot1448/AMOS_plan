@@ -12,7 +12,7 @@
               </option>
             </b-form-select>
             <div class="mt-3">
-              <b-button @click="send_variant" size="lg" variant="primary"
+              <b-button id="save_var" @click="send_variant" size="lg" variant="primary"
                 >Сохранить</b-button
               >
             </div>
@@ -63,6 +63,7 @@ export default {
         .then((response) => {
           if (response.data.message === "") {
             this.answer = true;
+            document.getElementById("save_var").disabled = true;
           }
         })
         .catch((error) => {

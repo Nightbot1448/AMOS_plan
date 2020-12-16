@@ -19,7 +19,7 @@
                     <b-form-input v-model.number="vars[0]" type="number" />
                   </b-col>
                   <b-col cols="3">
-                    <b-button @click="send_mean_var" variant="primary"
+                    <b-button id="check_mean_var" @click="send_mean_var" variant="primary"
                       >Проверить</b-button
                     >
                   </b-col>
@@ -58,8 +58,8 @@
               </table>
             </div>
           </b-card>
-          <b-alert class="mt-2" variant="danger" :show="data_p">
-            Не верно указаны дисперсия и среднее.</b-alert
+          <b-alert class="mt-2" variant="danger" :show="data_p ? true : false">
+            {{ data_p }}</b-alert
           >
           <div class="mb-5 mt-5">
             <b-button variant="secondary" to="/reproducibility">Далее</b-button>
@@ -84,7 +84,7 @@ export default {
     return {
       means: [0],
       vars: [0],
-      data_p: false,
+      data_p: "",
       endpoints: [
         "http://127.0.0.1:5000/api/check/mean_var",
         "http://127.0.0.1:5000/api/get/means_vars",
@@ -104,11 +104,11 @@ export default {
         .then((response) => {
           if (response.data.message === "") {
             document.getElementById("data").style.display = "none";
-            this.data_p = false;
             document.getElementById("correct_data").style.display = "block";
             document.getElementById("show_result").style.display = "block";
+            document.getElementById("check_mean_var").disabled = true;
           } else {
-            this.data_p = true;
+            this.data_p = response.data.message;
           }
         })
         .catch((error) => {
@@ -124,6 +124,7 @@ export default {
             this.means = response.data.data.means;
             this.vars = response.data.data.vars;
             document.getElementById("mean_var_table").style.display = "block";
+            document.getElementById("show_result").disabled = true;
           } else {
           }
         })

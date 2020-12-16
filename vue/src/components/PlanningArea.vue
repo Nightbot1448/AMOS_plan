@@ -28,7 +28,7 @@
       </tbody>
     </table>
     <div class="mt-3">
-    <b-button @click="send_points" size="lg" variant="primary">Сохранить</b-button></div>
+    <b-button id="save_data" @click="send_points" size="lg" variant="primary">Сохранить</b-button></div>
     </b-card>
     <b-alert class="mt-2" variant="success" :show="answer">Область планирования успешно задана.</b-alert>
     <b-alert class="mt-2" variant="danger" :show="error ? true : false">{{ error }}</b-alert>
@@ -92,6 +92,7 @@ export default {
         .then((response) => {
           if (response.data.message === "") {
             this.answer = true;
+            document.getElementById("save_data").disabled = true;
           }
           else {
             this.error = response.data.message

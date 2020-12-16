@@ -14,8 +14,16 @@
                 type="number"
                 v-model.number="number_of_points"
               />
-              <b-button class="mt-2" @click="send_number_of_points" variant="primary"
-                >Проверить</b-button
+              <b-button
+                id="check_num_points"
+                class="mt-2"
+                @click="send_number_of_points"
+                variant="primary"
+              >
+                <div class="d-flex justify-content-center">
+                  <b-spinner small id="spinner_check" style="display: none"></b-spinner>
+                </div>
+                Проверить</b-button
               >
             </div>
             <div id="set_points" style="display: none">
@@ -51,7 +59,9 @@
                 <label>Количество параллельных экспериментов (не более 5)</label>
                 <b-form-input type="number" v-model.number="experiments_number" />
               </p>
-              <b-button @click="send_plan_points" variant="primary">Сохранить</b-button>
+              <b-button id="set_data" @click="send_plan_points" variant="primary"
+                >Сохранить</b-button
+              >
             </div>
           </b-card>
           <b-alert class="mt-2" variant="success" :show="answer ? true : false">{{
@@ -170,6 +180,8 @@ export default {
         .then((response) => {
           if (response.data.message === "") {
             this.answer = "Количество точек в спектре плана указано верно.";
+            document.getElementById("check_num_points").disabled = true;
+            document.getElementById("spinner_check").style.display = "block";
             setTimeout(function (e) {
               document.getElementById("set_points_number").style.display = "none";
               document.getElementById("set_points").style.display = "block";
@@ -192,6 +204,7 @@ export default {
         .then((response) => {
           if (response.data.message === "") {
             this.answer2 = "Сохранено!";
+            document.getElementById("set_data").disabled = true;
           } else this.error2 = response.data.message;
         })
         .catch((error) => {
