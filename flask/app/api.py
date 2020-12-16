@@ -7,6 +7,7 @@ from model_generator import utils
 from model_generator.userState import UserState
 from model_generator.generator import FullFactorModel
 from model_generator.critical_stat_values.cochrain import COCHRAIN_TABLES
+from model_generator.critical_stat_values.student import STUDENT_TABLE
 from api_user import APIUser
 
 
@@ -421,6 +422,14 @@ def check_params_for_check():
 def get_model_params():
     if USER.model_params and USER.model_params.get('is_param_checked'):
         return jsonify(dict(data={'coef': USER.model_params['student']['prac_value'], 'is_sign': USER.model_params['is_sign']}, message = '', error=False))
+    else:   
+        return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
+
+
+@bp.route('/get/student_table', methods=['get'])
+def get_student_table():
+    if USER.model_params and USER.model_params.get('is_param_checked'):
+        return jsonify(dict(data=STUDENT_TABLE[USER.model_params['significance']], message = '', error=False))
     else:   
         return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
 
