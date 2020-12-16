@@ -1,4 +1,5 @@
 from model_generator.generator import MODEL_TASKS
+from numpy import random as nprandom
 
 
 def get_from_request_json(request_json, key, default_value=None): return request_json.get('data', {}).get(key, default_value)
@@ -6,6 +7,10 @@ def get_from_request_json(request_json, key, default_value=None): return request
 
 def get_model_by_task_id(task_id): return MODEL_TASKS.get(task_id, None)
 
+def get_model_params_for_check(params, is_sign):
+    if all(is_sign): return nprandom.choice(params, size=2, replace=False).tolist()
+    not_sign_index = params.index(False)
+    return (params[not_sign_index], params[(not_sign_index+1) % len(params)]) 
 
 def is_valid_task_id(task_id): return bool(get_model_by_task_id(task_id))
 
@@ -65,3 +70,6 @@ def is_valid_cochrain(cochrain, calc_cochrain, max_diff=0.025): return equal_flo
 
 
 def is_valid_anything(user, calc, max_diff_percent=0.01): return equal_float(user, calc, max_diff_percent)
+
+
+def is_valid_param_num(user_num): return user_num == 4
