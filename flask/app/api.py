@@ -192,7 +192,7 @@ def check_mean_var():
         
         y_prac_mean, y_prac_var = USER.model.points_mean_var()
         USER.means_vars = dict(means=y_prac_mean.tolist(), vars=y_prac_var.tolist())
-
+        USER.state = UserState.reproduciblility
         return jsonify(dict(data={}, message = '', error=False))
 
 
@@ -292,6 +292,7 @@ def check_reproducible_var():
         reproducible_var = utils.get_from_request_json(request.json, 'reproducible_var')
         if not utils.is_valid_anything(reproducible_var, USER.reproduce_res['reproducibility_var']):
             return jsonify(dict(data={}, message = "Reproducible_var is invalid ({})".format(reproducible_var), error=True))
+        USER.state = UserState.estimate_parametrs
         return jsonify(dict(data={}, message = '', error=False))
     else:   
         return jsonify(dict(data={}, message = "Your didn't set is_reproducible", error=True))
