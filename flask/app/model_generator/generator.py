@@ -333,6 +333,12 @@ class FullFactorModel:
 
     def get_reproducibility_info(self):
         return {key: self.__results.get(key, None) for key in ('cochrain', 'is_reproducible', 'reproducibility_var')}
+    
+    def get_model_params_info(self):
+        return {key: self.__results.get(key, None) for key in ('model_params', 'model_params_var', 'student')}
+
+    def get_model_params_sing(self):
+        return {key: self.__results.get(key, None) for key in ('is_sign', 'sign_coef', 'student')}
 
 
 MODEL_TASKS = {
