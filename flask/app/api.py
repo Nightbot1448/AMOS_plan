@@ -252,9 +252,9 @@ def check_cochrain_freedom_degree():
     if USER.cochrain_status > 0: # when we reset it?
         df_numerator = utils.get_from_request_json(request.json, 'df_numerator', 0)
         df_denominator = utils.get_from_request_json(request.json, 'df_denominator', 0)
-        if not utils.is_valid_anything(df_numerator, USER.reproduce_res['cochrain']['df_numerator']):
+        if not utils.is_valid_int(df_numerator, USER.reproduce_res['cochrain']['df_numerator']):
             return jsonify(dict(data={}, message = "Numerator is invalid ({})".format(df_numerator), error=True))
-        if not utils.is_valid_anything(df_denominator, USER.reproduce_res['cochrain']['df_denominator']):
+        if not utils.is_valid_int(df_denominator, USER.reproduce_res['cochrain']['df_denominator']):
             return jsonify(dict(data={}, message = "Denominator is invalid ({})".format(df_denominator), error=True))
         USER.cochrain_status = 2
         return jsonify(dict(data={}, message = '', error=False))
@@ -389,11 +389,6 @@ def set_significance_level_student():
 
 @bp.route('/get/params_for_check', methods=['GET'])
 def get_params_for_check():
-    """
-    Validate cochrain and get table
-
-    error = True if cochrain is invalid else False
-    """
     if USER.model_params and USER.model_params.get('significance'):
         USER.model_params['params_for_check'] = utils.get_model_params_for_check((0,1,2,3), USER.model_params['is_sign'])
         return jsonify(dict(data={'params': USER.model_params['params_for_check']}, message = '', error=False))
@@ -418,20 +413,49 @@ def check_params_for_check():
         return jsonify(dict(data={}, message = "Your didn't /get/params_for_check", error=True))
 
 
-@bp.route('/get/model_params', methods=['get'])
-def get_model_params():
-    if USER.model_params and USER.model_params.get('is_param_checked'):
-        return jsonify(dict(data={'coef': USER.model_params['student']['prac_value'], 'is_sign': USER.model_params['is_sign']}, message = '', error=False))
-    else:   
-        return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
-
-
-@bp.route('/get/student_table', methods=['get'])
+@bp.route('/get/student_table', methods=['GET'])
 def get_student_table():
     if USER.model_params and USER.model_params.get('is_param_checked'):
         return jsonify(dict(data=STUDENT_TABLE[USER.model_params['significance']], message = '', error=False))
     else:   
         return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
+
+
+@bp.route('/check/df_student', methods=['POST'])
+def check_df_student():
+    if USER.model_params and USER.model_params.get('is_param_checked'):
+        df_student = utils.get_from_request_json(request.json, 'df_student', 0)
+        if not utils.is_valid_int(df_student, USER.model_params['student']['df']):
+            return jsonify(dict(data={}, message = "df_student is invalid ({})".format(df_student), error=True))
+        USER.model_params['df_student_checked'] = True
+        return jsonify(dict(data={'prac': USER.model_params['student']['prac_value'][0], 'crit_val': USER.model_params['student']['crit_value']}, message = '', error=False))
+    else:
+        return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
+
+
+@bp.route('/check/sign_param', methods=['POST'])
+def check_sign_param():
+    if USER.model_params and USER.model_params.get('df_student_checked'):
+        is_sign = utils.get_from_request_json(request.json, 'is_sign', None)
+        if is_sign != USER.model_params['is_sign'][0]:
+            return jsonify(dict(data={}, message = "sign_param is invalid ({})".format(sign_param), error=True))
+        USER.model_params['sign_param_checked'] = True
+        return jsonify(dict(data={}, message = '', error=False))
+    else:
+        return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
+
+
+@bp.route('/get/sign_params', methods=['GET'])
+def get_sign_params():
+    if USER.model_params and USER.model_params.get('sign_param_checked'):
+        return jsonify(dict(data={
+            'params': USER.model_params['model_params'],
+            'prac': USER.model_params['student']['prac_value'],
+            'is_sign': USER.model_params['is_sign']
+        }, message = '', error=False))
+    else:
+        return jsonify(dict(data={}, message = "Your didn't check sign_param", error=True))
+
 
 @bp.after_request
 def after_request(response):
