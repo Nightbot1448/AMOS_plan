@@ -1,72 +1,85 @@
 <template>
   <div>
-    <div id="significance">
-      <label for="significance">Уровень значимости</label>
-      <select id="significance" v-model.number="significance" type="number">
-        <option>0.01</option>
-        <option>0.05</option>
-      </select>
-      <button @click="send_significance">Сохранить</button>
-    </div>
-    <div id="sum_var" style="display: none">
-      <label for="sum_var">Сумма дисперсий отклика по всем точкам:</label>
-      <p>{{ sum_var }}</p>
-    </div>
-    <div id="cochrain" style="display: none">
-      <label for="cochrain">Наблюдаемое значение критерия Кохрена:</label>
-      <input v-model.number="cochrain" type="number" />
-      <button @click="send_cochrain()">Сохранить</button>
-      <p id="cochrain_answer"></p>
-    </div>
-    <div id="table_cochrain" style="display: none">ТАБЛИЦА</div>
-    <div id="cochrain_freedom_degree" style="display: none">
-      <div>
-        <label for="df_numerator"
-          >Введите число степеней свободы <b>числителя</b> критерия Кохрена:</label
-        ><br />
-        <input v-model.number="df_numerator" type="number" />
-      </div>
-      <div>
-        <label for="df_denominator"
-          >Введите число степеней свободы <b>знаменателя</b> критерия Кохрена:</label
-        ><br />
-        <input v-model.number="df_denominator" type="number" />
-      </div>
-      <div>
-        <button @click="send_cochrain_freedom_degree()">Сохранить</button>
-        <p id="freedom_answer"></p>
-      </div>
-    </div>
-    <div id="cochrain_compare" style="display: none">
-      <label for="cochrain">Наблюдаемое значение критерия Кохрена: {{ cochrain }}</label
-      ><br />
-      <label for="crit_cochrain"
-        >Критическое значение критерия Кохрена: {{ crit_cochrain }}</label
-      >
-      <div>
-        <label>Гипотеза о воспроизводимости эксперимента подтверждается?</label>
-        <button @click="is_reproducible(true)">Да</button>
-        <button @click="is_reproducible(false)">Нет</button>
-      </div>
-      <p id="reproducible_answer"></p>
-    </div>
-    <div id="reproducible_var" style="display: none">
-      <label for="reproducible_var"
-        >Введите значение дисперсии ошибки эксперимента:</label
-      >
-      <input v-model.number="reproducible_var" type="number" />
-      <button @click="send_reproducible_var">Сохранить</button>
-      <p id="reproducible_var_answer"></p>
-    </div>
-    <div id="results" style="display: none">
-      <p>
-        Проверка проводилась по критерию Кохрена на уровне значимости {{ significance }}
-      </p>
-      <p>Наблюдаемое значение критерия Кохрена: {{ cochrain }}</p>
-      <p>Критическое значение критерия Кохрена: {{ crit_cochrain }}</p>
-      <p>Вывод: эксперимент <span v-if="!reproducibility">не</span> воспроизводим</p>
-      <p>Дисперсия ошибки (воспроизводимости) эксперимента: {{ reproducible_var }}</p>
-    </div>
+    <b-container>
+      <b-row>
+        <b-col cols="2"></b-col>
+        <b-col cols="8" align="center">
+          <b-card class="mb-2 mt-2">
+            <div id="significance">
+              <label for="significance">Уровень значимости</label>
+              <b-form-select id="significance" v-model.number="significance" type="number">
+                <option>0.01</option>
+                <option>0.05</option>
+              </b-form-select>
+              <b-button @click="send_significance" variant="primary" class="mt-4" id="send_sign">Сохранить</b-button>
+            </div>
+            <div id="sum_var" style="display: none">
+              <label for="sum_var">Сумма дисперсий отклика по всем точкам:</label>
+              <p>{{ sum_var }}</p>
+            </div>
+            <div id="cochrain" style="display: none">
+              <label for="cochrain">Наблюдаемое значение критерия Кохрена:</label>
+              <b-form-input v-model.number="cochrain" type="number" />
+              <b-button id="send_coch" @click="send_cochrain()" class="mt-4" variant="primary">Сохранить</b-button>
+            </div>
+            <div id="table_cochrain" style="display: none">ТАБЛИЦА</div>
+            <div id="cochrain_freedom_degree" style="display: none">
+              <div>
+                <label for="df_numerator"
+                  >Введите число степеней свободы <b>числителя</b> критерия Кохрена:</label
+                ><br />
+                <b-form-input v-model.number="df_numerator" type="number" />
+              </div>
+              <div>
+                <label for="df_denominator"
+                  >Введите число степеней свободы <b>знаменателя</b> критерия Кохрена:</label
+                ><br />
+                <b-form-input v-model.number="df_denominator" type="number" />
+              </div>
+              <div>
+                <b-button class="mt-4" id="send_coch_free" @click="send_cochrain_freedom_degree()" variant="primary">Сохранить</b-button>
+              </div>
+            </div>
+            <div id="cochrain_compare" style="display: none">
+              <label for="cochrain">Наблюдаемое значение критерия Кохрена: {{ cochrain }}</label
+              ><br />
+              <label for="crit_cochrain"
+                >Критическое значение критерия Кохрена: {{ crit_cochrain }}</label
+              >
+              <div>
+                <label>Гипотеза о воспроизводимости эксперимента подтверждается?</label>
+                <b-button @click="is_reproducible(true)" variant="primary">Да</b-button>
+                <b-button @click="is_reproducible(false)" variant="primary">Нет</b-button>
+              </div>
+              <p id="reproducible_answer"></p>
+            </div>
+            <div id="reproducible_var" style="display: none">
+              <label for="reproducible_var"
+                >Введите значение дисперсии ошибки эксперимента:</label
+              >
+              <b-form-input v-model.number="reproducible_var" type="number" />
+              <b-button class="mt-4" id="rep_var" @click="send_reproducible_var" variant="primary">Сохранить</b-button>
+              <p id="reproducible_var_answer"></p>
+            </div>
+            <div id="results" style="display: none">
+              <p>
+                Проверка проводилась по критерию Кохрена на уровне значимости {{ significance }}
+              </p>
+              <p>Наблюдаемое значение критерия Кохрена: {{ cochrain }}</p>
+              <p>Критическое значение критерия Кохрена: {{ crit_cochrain }}</p>
+              <p>Вывод: эксперимент <span v-if="!reproducibility">не</span> воспроизводим</p>
+              <p>Дисперсия ошибки (воспроизводимости) эксперимента: {{ reproducible_var }}</p>
+            </div>
+          </b-card>
+          <b-alert class="mt-2" variant="danger" :show="cochrain_answer ? true : false">
+            {{ cochrain_answer }}</b-alert
+          >
+          <b-alert class="mt-2" variant="danger" :show="cochrain_answer ? true : false">
+            {{ freedom_answer }}</b-alert
+          >
+        </b-col>
+      </b-row>
+    </b-container>
     <div class="documentation">
       <b-card bg-variant="info">
         <p>Уровень значимости - вероятность отвержения правильной гипотезы</p>
@@ -197,6 +210,8 @@ export default {
       crit_cochrain: 0,
       reproducibility: 0,
       reproducible_var: 0,
+      cochrain_answer: "",
+      freedom_answer: "",
       endpoints: [
         "http://127.0.0.1:5000/api/set/significance_level",
         "http://127.0.0.1:5000/api/check/cochrain",
@@ -214,6 +229,7 @@ export default {
         .post(this.endpoints[0], { data: { significance: this.significance } })
         .then((response) => {
           if (response.data.message === "") {
+            document.getElementById("send_sign").disabled = true;
             document.getElementById("significance").style.display = "none";
             document.getElementById("sum_var").style.display = "block";
             document.getElementById("cochrain").style.display = "block";
@@ -238,12 +254,13 @@ export default {
           ) {
             document.getElementById("sum_var").style.display = "none";
             document.getElementById("cochrain").style.display = "none";
+            document.getElementById("send_coch").disabled = true;
             //do smth with cochrain table
             alert("Допустим, отрисовалась таблица Кохрена");
             document.getElementById("table_cochrain").style.display = "block";
             document.getElementById("cochrain_freedom_degree").style.display = "block";
           } else {
-            document.getElementById("cochrain_answer").innerText = "Неправильно.";
+            this.cochrain_answer = response.data.message;
             this.$forceUpdate();
           }
         })
@@ -262,7 +279,7 @@ export default {
         })
         .then((response) => {
           if (response.data.message == "") {
-            document.getElementById("freedom_answer").innerText = "Правильно.";
+            document.getElementById("send_coch_free").disabled = true;
             setTimeout(function (e) {
               document.getElementById("table_cochrain").style.display = "none";
               document.getElementById("cochrain_freedom_degree").style.display = "none";
@@ -285,6 +302,7 @@ export default {
                 console.log(error);
               });
           } else {
+            this.freedom_answer = response.data.message
           }
         })
         .catch((error) => {
@@ -316,8 +334,14 @@ export default {
         .post(this.endpoints[5], { data: { reproducible_var: this.reproducible_var } })
         .then((response) => {
           if (response.data.message == "") {
+            document.getElementById("rep_var").disabled = true;
+            document.getElementById("cochrain_compare").style.display = "none";
+            document.getElementById("reproducible_var").style.display = "none";
             document.getElementById("results").style.display = "block";
             document.getElementById("reproducible_var_answer").innerText = "Правильно.";
+            setTimeout({
+
+            }, 1500)
           } else {
             document.getElementById("reproducible_var_answer").innerText = "Неправильно.";
           }
