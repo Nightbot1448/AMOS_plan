@@ -391,7 +391,7 @@ def set_significance_level_student():
 @bp.route('/get/params_for_check', methods=['GET'])
 def get_params_for_check():
     if USER.model_params and USER.model_params.get('significance'):
-        USER.model_params['params_for_check'] = utils.get_model_params_for_check((0,1,2,3), USER.model_params['is_sign'])
+        USER.model_params['params_for_check'] = utils.get_model_params_for_check((0,1,2,3), USER.model_params['is_sign'].tolist())
         return jsonify(dict(data={'params': USER.model_params['params_for_check']}, message = '', error=False))
     else:   
         return jsonify(dict(data={}, message = "Your didn't set significance level", error=True))
