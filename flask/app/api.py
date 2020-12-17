@@ -240,7 +240,7 @@ def check_cochrain():
         cochrain = utils.get_from_request_json(request.json, 'cochrain', 0)
         if utils.is_valid_cochrain(cochrain, USER.reproduce_res['cochrain']):
             USER.cochrain_status = 1
-            return jsonify(dict(data=COCHRAIN_TABLES[cochrain], message = '', error=False))
+            return jsonify(dict(data=COCHRAIN_TABLES[USER.cochrain_significance], message = '', error=False))
         else:
             return jsonify(dict(data={}, message = "Сochrain is invalid ({})".format(cochrain), error=True))
     else:   

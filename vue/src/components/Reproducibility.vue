@@ -22,7 +22,30 @@
               <b-form-input v-model.number="cochrain" type="number" />
               <b-button id="send_coch" @click="send_cochrain()" class="mt-4" variant="primary">Сохранить</b-button>
             </div>
-            <div id="table_cochrain" style="display: none">ТАБЛИЦА</div>
+            <div id="table_cochrain" style="display: none">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th rowspan="2">Число степеней свободы знаменателя</th>
+                    <th colspan="4">Число степеней свободы числителя</th>
+                  </tr>
+                  <tr>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(n, i) in cochrain_table_denominators.length" :key="i">
+                    <td>{{ cochrain_table_denominators[i] }}</td>
+                    <td v-for="(n, j) in cochrain_table_numerators.length" :key="j">
+                      {{ cochrain_table_vars[i][j]}}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             <div id="cochrain_freedom_degree" style="display: none">
               <div>
                 <label for="df_numerator"
@@ -74,7 +97,7 @@
           <b-alert class="mt-2" variant="danger" :show="cochrain_answer ? true : false">
             {{ cochrain_answer }}</b-alert
           >
-          <b-alert class="mt-2" variant="danger" :show="cochrain_answer ? true : false">
+          <b-alert class="mt-2" variant="danger" :show="freedom_answer ? true : false">
             {{ freedom_answer }}</b-alert
           >
         </b-col>
@@ -212,6 +235,9 @@ export default {
       reproducible_var: 0,
       cochrain_answer: "",
       freedom_answer: "",
+      cochrain_table_numerators: [],
+      cochrain_table_denominators: [],
+      cochrain_table_vars: [[]],
       endpoints: [
         "http://127.0.0.1:5000/api/set/significance_level",
         "http://127.0.0.1:5000/api/check/cochrain",
@@ -249,14 +275,14 @@ export default {
         })
         .then((response) => {
           if (
-            response.data.message ===
-            "Тут могла быть таблица для Кохрана, но её не завезли"
+            !response.data.error
           ) {
+            this.cochrain_table_numerators = response.data.data.numerators
+            this.cochrain_table_denominators = response.data.data.denominators
+            this.cochrain_table_vars = response.data.data.vals
             document.getElementById("sum_var").style.display = "none";
             document.getElementById("cochrain").style.display = "none";
             document.getElementById("send_coch").disabled = true;
-            //do smth with cochrain table
-            alert("Допустим, отрисовалась таблица Кохрена");
             document.getElementById("table_cochrain").style.display = "block";
             document.getElementById("cochrain_freedom_degree").style.display = "block";
           } else {
@@ -278,7 +304,7 @@ export default {
           },
         })
         .then((response) => {
-          if (response.data.message == "") {
+          if (!response.data.error) {
             document.getElementById("send_coch_free").disabled = true;
             setTimeout(function (e) {
               document.getElementById("table_cochrain").style.display = "none";

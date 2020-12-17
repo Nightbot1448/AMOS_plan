@@ -14,7 +14,7 @@ class APIUser:
     plan_points: np.array = None
     experiments_number: int = None
     model: FullFactorModel = None
-    factor_point_index: int = None
+    factor_point_index: int = 0
     means_vars: int = 0  # dict
     reproduce_res: int = 0  # dict
     cochrain_significance: float = None
@@ -30,7 +30,7 @@ class APIUser:
         self.plan_points = None
         self.experiments_number = None
         self.model = None
-        self.factor_point_index = None
+        self.factor_point_index = 0
         self.means_vars = {}
         self.reproduce_res = {}
         self.cochrain_significance = None
