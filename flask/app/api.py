@@ -306,8 +306,8 @@ def get_reproducible_info():
             'level': USER.cochrain_significance,
             'prac_val': USER.reproduce_res['cochrain']['prac_value'],
             'crit_val': USER.reproduce_res['cochrain']['crit_value'],
-            'is_reproducible': USER.reproduce_res['cochrain']['is_reproducible'],
-            'reproducible_var': USER.reproduce_res['cochrain']['reproducible_var']
+            'is_reproducible': USER.reproduce_res['is_reproducible'].tolist(),
+            'reproducible_var': USER.reproduce_res['reproducibility_var'].tolist()
         }, message = '', error=False))
     else:   
         return jsonify(dict(data={}, message = "Your didn't set reproducible_var", error=True))

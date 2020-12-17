@@ -88,10 +88,10 @@
               <p>
                 Проверка проводилась по критерию Кохрена на уровне значимости {{ significance }}
               </p>
-              <p>Наблюдаемое значение критерия Кохрена: {{ cochrain }}</p>
+              <p>Наблюдаемое значение критерия Кохрена: {{ Number(cochrain.toFixed(3)) }}</p>
               <p>Критическое значение критерия Кохрена: {{ crit_cochrain }}</p>
               <p>Вывод: эксперимент <span v-if="!reproducibility">не</span> воспроизводим</p>
-              <p>Дисперсия ошибки (воспроизводимости) эксперимента: {{ reproducible_var }}</p>
+              <p>Дисперсия ошибки (воспроизводимости) эксперимента: {{ Number(reproducible_var.toFixed(3)) }}</p>
             </div>
           </b-card>
           <b-alert class="mt-2" variant="danger" :show="cochrain_answer ? true : false">
@@ -100,6 +100,9 @@
           <b-alert class="mt-2" variant="danger" :show="freedom_answer ? true : false">
             {{ freedom_answer }}</b-alert
           >
+          <div class="mb-5 mt-5">
+            <b-button variant="secondary" to="/parameter_estimation">Далее</b-button>
+          </div>
         </b-col>
       </b-row>
     </b-container>
@@ -245,6 +248,7 @@ export default {
         "http://127.0.0.1:5000/api/get/cochrain",
         "http://127.0.0.1:5000/api/check/is_reproducible",
         "http://127.0.0.1:5000/api/check/reproducible_var",
+        "http://127.0.0.1:5000/api/get/reproducible_info"
       ],
     };
   },
@@ -306,10 +310,8 @@ export default {
         .then((response) => {
           if (!response.data.error) {
             document.getElementById("send_coch_free").disabled = true;
-            setTimeout(function (e) {
-              document.getElementById("table_cochrain").style.display = "none";
-              document.getElementById("cochrain_freedom_degree").style.display = "none";
-            }, 1500);
+            document.getElementById("table_cochrain").style.display = "none";
+            document.getElementById("cochrain_freedom_degree").style.display = "none";
             document.getElementById("cochrain_compare").style.display = "block";
             this.$forceUpdate();
             axios
@@ -363,6 +365,15 @@ export default {
             document.getElementById("rep_var").disabled = true;
             document.getElementById("cochrain_compare").style.display = "none";
             document.getElementById("reproducible_var").style.display = "none";
+            axios
+              .get(this.endpoints[6])
+              .then((response) => {
+                this.significance = response.data.data.level
+                this.cochrain = response.data.data.prac_val
+                this.crit_cochrain = response.data.data.crit_val
+                this.reproducibility = response.data.data.is_reproducible
+                this.reproducible_var = response.data.data.reproducible_var
+              })
             document.getElementById("results").style.display = "block";
             document.getElementById("reproducible_var_answer").innerText = "Правильно.";
           } else {
