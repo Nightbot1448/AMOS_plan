@@ -9,7 +9,7 @@ def get_model_by_task_id(task_id): return MODEL_TASKS.get(task_id, None)
 
 def get_model_params_for_check(params, is_sign):
     if all(is_sign): return nprandom.choice(params, size=2, replace=False).tolist()
-    not_sign_index = params.index(False)
+    not_sign_index = is_sign.index(False)
     return (params[not_sign_index], params[(not_sign_index+1) % len(params)]) 
 
 def is_valid_task_id(task_id): return bool(get_model_by_task_id(task_id))
