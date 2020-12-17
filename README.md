@@ -11,3 +11,10 @@ npm install bootstrap-vue bootstrap
 ```bash
 npm run dev
 ```
+
+## Docker
+
+```
+sudo docker build -t planexe .
+sudo docker run --network host --rm -it -p 8080:8080 planexe
+```
