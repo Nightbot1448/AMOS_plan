@@ -320,6 +320,7 @@ def check_param_num():
         if not utils.is_valid_param_num(param_num):
             return jsonify(dict(data={}, message = "Param_num is invalid ({})".format(param_num), error=True))
 
+        USER.model.get_estimate_parameters()
         USER.model_params = USER.model.get_model_params_info()
 
         return jsonify(dict(data={}, message = '', error=False))
@@ -334,7 +335,7 @@ def check_const_param():
 
         var_const_param = utils.get_from_request_json(request.json, 'var_const_param')
         if not utils.is_valid_anything(var_const_param, USER.model_params['model_params_var']):
-            return jsonify(dict(data={}, message = "Const_param variance is invalid ({})".format(const_param), error=True))
+            return jsonify(dict(data={}, message = "Const_param variance is invalid ({})".format(var_const_param), error=True))
 
         USER.model_params['next_param'] = True
         return jsonify(dict(data={}, message = '', error=False))
@@ -350,7 +351,7 @@ def check_next_param():
 
         var_const_param = utils.get_from_request_json(request.json, 'var_b12_param')
         if not utils.is_valid_anything(var_const_param, USER.model_params['model_params_var']):
-            return jsonify(dict(data={}, message = "b12_param variance is invalid ({})".format(const_param), error=True))
+            return jsonify(dict(data={}, message = "b12_param variance is invalid ({})".format(var_const_param), error=True))
         
         USER.model_params['get_param'] = True
         return jsonify(dict(data={}, message = '', error=False))
@@ -360,8 +361,8 @@ def check_next_param():
 def get_param():
     if USER.model_params and USER.model_params.get('get_param'):
         return jsonify(dict(data={
-            'params': USER.model_params.get('model_params'),
-            'var': USER.model_params.get('model_params_var')
+            'params': USER.model_params.get('model_params').tolist(),
+            'var': USER.model_params.get('model_params_var').tolist()
         }, message = '', error=False))
     else:
         return jsonify(dict(data={}, message = "Params aren't set", error=True))

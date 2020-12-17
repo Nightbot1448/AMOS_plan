@@ -1,13 +1,64 @@
 <template>
   <div>
-    <p>
-      <label for="variant">Номер варианта задания</label>
-      <select id="variant" v-model.number="variant" type="number">
-        <option v-for="(n, index) in 6" :key="index">{{ index + 1 }}</option>
-      </select>
-      <button @click="send_variant">Сохранить</button>
-    </p>
-    <router-link class="nav-link" to="/planning_area">Далее</router-link>
+    <b-container>
+      <b-row>
+        <b-col cols="2"></b-col>
+        <b-col cols="8" align="center">
+          <b-card class="mb-2 mt-2">
+            <div id="set_parameters_num">
+              <label for="params_num">Сколько параметров содержит модель?</label>
+              <b-form-input v-model.number="params_num" type="number" />
+              <b-button id="send_params_num" @click="send_params_num()" class="mt-4" variant="primary">Сохранить</b-button>
+            </div>
+            <div id="set_const_param" style="display: none">
+              <label for="const_param">Чему равна постоянная составляющая модели?</label>
+              <b-form-input v-model.number="const_param" type="number" />
+              <label for="var_const_param">Чему равна дисперсия этого параметра?</label>
+              <b-form-input v-model.number="var_const_param" type="number" />
+              <b-button id="send_const_param" @click="send_const_param()" class="mt-4" variant="primary">Сохранить</b-button>
+            </div>
+            <div id="set_next_param" style="display: none">
+              <label for="next_param">Чему равен параметр В12?</label>
+              <b-form-input v-model.number="next_param" type="number" />
+              <label for="var_b12_param">Чему равна его дисперсия?</label>
+              <b-form-input v-model.number="var_b12_param" type="number" />
+              <b-button id="send_next_param" @click="send_next_param()" class="mt-4" variant="primary">Сохранить</b-button>
+            </div>
+            <div id="get_params" style="display: none">
+              <h3>Оценки параметров модели объекта:</h3>
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Обозначение</th>
+                    <th>Оценка</th>
+                    <th>Дисперсия</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(n, i) in notation.length" :key="i">
+                    <td>{{ notation[i] }}</td>
+                    <td> {{ Number(model_params[i].toFixed(3)) }}</td>
+                    <td> {{ Number(model_params_var.toFixed(3)) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </b-card>
+          <b-alert class="mt-2" variant="danger" :show="params_num_answer ? true : false">
+            {{ params_num_answer }}</b-alert
+          >
+          <b-alert class="mt-2" variant="danger" :show="const_param_answer ? true : false">
+            {{ const_param_answer }}</b-alert
+          >
+          <b-alert class="mt-2" variant="danger" :show="next_param_answer ? true : false">
+            {{ next_param_answer }}</b-alert
+          >
+          <div class="mb-5 mt-5">
+            <b-button variant="secondary" to="/significance">Далее</b-button>
+          </div>
+        </b-col>
+      </b-row>
+    </b-container>
     <div class="documentation">
       <b-card bg-variant="info">
       <p>
@@ -203,20 +254,83 @@ export default {
   created() {},
   data() {
     return {
-      variant: 2,
-      help: null,
-      endpoint: "http://127.0.0.1:5000/api/check/task",
+      params_num: 0,
+      params_num_answer: "",
+      const_param: 0,
+      var_const_param: 0,
+      const_param_answer: "",
+      next_param: 0,
+      var_b12_param: 0,
+      next_param_answer: "",
+      notation: ["B0", "B1", "B2","B12"],
+      model_params: [0,0,0,0],
+      model_params_var: 0,
+      endpoints: ["http://127.0.0.1:5000/api/check/param_num", "http://127.0.0.1:5000/api/check/const_param", "http://127.0.0.1:5000/api/check/next_param", "http://127.0.0.1:5000/api/get/params"]
     };
   },
   props: {},
   methods: {
-    save_variant: function (e) {
-      this.$store.dispatch("changeVariant", this.variant);
-    },
-    send_variant: function (e) {
+    send_params_num: function (e) {
       axios
-        .get(this.endpoint, { params: { task_id: this.variant } })
-        .then((response) => {})
+        .post(this.endpoints[0], { data: { param_num: this.params_num } })
+        .then((response) => {
+          if (!response.data.error){
+            document.getElementById("set_parameters_num").style.display = "none";
+            document.getElementById("set_const_param").style.display = "block";
+          }
+          else {
+            this.params_num_answer = response.data.message;
+          }
+        })
+        .catch((error) => {
+          console.log("-----error-------");
+          console.log(error);
+        });
+    },
+    send_const_param: function (e) {
+      axios
+        .post(this.endpoints[1], { data: { const_param: this.const_param, var_const_param: this.var_const_param } })
+        .then((response) => {
+          if (!response.data.error){
+            document.getElementById("set_next_param").style.display = "block"
+            document.getElementById("set_const_param").style.display = "none"
+          }
+          else {
+            this.const_param_answer = response.data.message;
+          }
+        })
+        .catch((error) => {
+          console.log("-----error-------");
+          console.log(error);
+        });
+    },
+    send_next_param: function (e) {
+      axios
+        .post(this.endpoints[2], { data: { next_param: this.next_param, var_b12_param: this.var_b12_param } })
+        .then((response) => {
+          if (!response.data.error){
+            document.getElementById("set_next_param").style.display = "none"
+            document.getElementById("get_params").style.display = "block"
+            axios
+              .get(this.endpoints[3])
+              .then((response) => {
+                if (!response.data.error){
+                  this.model_params = response.data.data.params
+                  this.model_params_var = response.data.data.var
+                }
+                else {
+                  this.const_param_answer = response.data.message;
+                }
+              })
+              .catch((error) => {
+                console.log("-----error-------");
+                console.log(error);
+              });
+          }
+          else {
+            this.const_param_answer = response.data.message;
+          }
+        })
         .catch((error) => {
           console.log("-----error-------");
           console.log(error);
