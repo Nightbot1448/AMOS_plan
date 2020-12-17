@@ -189,7 +189,7 @@ def check_mean_var():
         if not utils.is_valid_mean(mean, means[0]):
             return jsonify(dict(data={}, message = "Mean is invalid ({})".format(mean), error=True))
         if not utils.is_valid_var(var,vars[0]):
-            return jsonify(dict(data={}, message = "Var is invalid ({})".format(mean), error=True))
+            return jsonify(dict(data={}, message = "Var is invalid ({})".format(var), error=True))
         
         USER.means_vars = dict(means=means.tolist(), vars=vars.tolist())
         USER.state = UserState.reproduciblility
