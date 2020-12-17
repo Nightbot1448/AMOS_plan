@@ -406,7 +406,7 @@ def check_params_for_check():
         
         second_param = utils.get_from_request_json(request.json, 'second_param', 0)
         if not utils.is_valid_anything(second_param, USER.model_params['student']['prac_value'][USER.model_params['params_for_check'][1]]):
-            return jsonify(dict(data={}, message = "second_param is invalid ({})".format(first_param), error=True))
+            return jsonify(dict(data={}, message = "second_param is invalid ({})".format(second_param), error=True))
         
         USER.model_params['is_param_checked'] = True
         return jsonify(dict(data={}, message = '', error=False))
@@ -429,7 +429,7 @@ def check_df_student():
         if not utils.is_valid_int(df_student, USER.model_params['student']['df']):
             return jsonify(dict(data={}, message = "df_student is invalid ({})".format(df_student), error=True))
         USER.model_params['df_student_checked'] = True
-        return jsonify(dict(data={'prac': USER.model_params['student']['prac_value'][0], 'crit_val': USER.model_params['student']['crit_value']}, message = '', error=False))
+        return jsonify(dict(data={'prac': USER.model_params['student']['prac_value'].tolist(), 'crit_val': USER.model_params['student']['crit_value']}, message = '', error=False))
     else:
         return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
 
@@ -448,11 +448,11 @@ def check_sign_param():
 
 @bp.route('/get/sign_params', methods=['GET'])
 def get_sign_params():
-    if USER.model_params and USER.model_params.get('sign_param_checked'):
+    if USER.model_params and USER.model_params.get('df_student_checked'):
         return jsonify(dict(data={
-            'params': USER.model_params['model_params'],
-            'prac': USER.model_params['student']['prac_value'],
-            'is_sign': USER.model_params['is_sign']
+            'params': USER.model_params['model_params'].tolist(),
+            'prac': USER.model_params['student']['prac_value'].tolist(),
+            'is_sign': USER.model_params['is_sign'].tolist()
         }, message = '', error=False))
     else:
         return jsonify(dict(data={}, message = "Your didn't check sign_param", error=True))
