@@ -245,19 +245,8 @@ class FullFactorModel:
 
     def update_model_response(self):
         'Обновление отклика модели после удаления незначимых коэффициентов'
-        #ASK лучше чем что должно было получиться
-        # TODO пересчитать коэффициенты B
-        # TODO пересчитать по канону МНК
-        # before = self.model_response.copy()
-
+        self.previous_model_response = self.model_response.copy()
         self.model_response = self.significant_points@self.significant_b_coef
-        # print('До удалениея незначимых:  ', np.round(before,3))
-        # print('После удаления незначимых:', np.round(self.model_response,3))
-        # print('Отклик модели без шума:   ', np.round(np.squeeze(self.__y_mean),3))
-        # diff_before = np.squeeze(self.__y_mean)-before
-        # diff_after = np.squeeze(self.__y_mean)-self.model_response
-        # print('Разность до удаления:     ', np.round(diff_before,3), round(np.abs(diff_before).sum(),3))
-        # print('Разность после удаления:  ', np.round(diff_after,3), round(np.abs(diff_after).sum(),3))
 
     def check_params_significance(self, p_value=0.01):
         df_student, student_test_success, prac_student_values, student_crit = \
@@ -271,8 +260,8 @@ class FullFactorModel:
 
         if 'student' in self.__results.keys():
             self.__results['student'].update({
-                'model_response': self.model_response,
-                'prac_value': self.student_values(),
+                'new_model_response': self.model_response,
+                'prac_value': prac_student_values,
                 'df': df_student,
                 'crit_value': student_crit,
             })
