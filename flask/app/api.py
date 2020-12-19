@@ -6,6 +6,8 @@ import json
 from model_generator import utils
 from model_generator.userState import UserState
 from model_generator.generator import FullFactorModel
+from model_generator.critical_stat_values.cochrain import COCHRAIN_TABLES
+from model_generator.critical_stat_values.student import STUDENT_TABLE
 from api_user import APIUser
 
 
@@ -184,14 +186,13 @@ def check_mean_var():
         print(means[0])
         print(vars[0])
 
-        if not utils.is_valid_mean(mean, means[0]): # how to compare 0 and 0?
+        if not utils.is_valid_mean(mean, means[0]):
             return jsonify(dict(data={}, message = "Mean is invalid ({})".format(mean), error=True))
         if not utils.is_valid_var(var,vars[0]):
-            return jsonify(dict(data={}, message = "Var is invalid ({})".format(mean), error=True))
+            return jsonify(dict(data={}, message = "Var is invalid ({})".format(var), error=True))
         
-        y_prac_mean, y_prac_var = USER.model.points_mean_var()
-        USER.means_vars = dict(means=y_prac_mean.tolist(), vars=y_prac_var.tolist())
-
+        USER.means_vars = dict(means=means.tolist(), vars=vars.tolist())
+        USER.state = UserState.reproduciblility
         return jsonify(dict(data={}, message = '', error=False))
 
 
@@ -223,7 +224,7 @@ def set_significance_level():
             USER.reproduce_res = USER.model.get_reproducibility_info()
             return jsonify(dict(data={'sum_var': sum(USER.means_vars['vars'])}, message = '', error=False))
         else:
-            return jsonify(dict(data={}, message = "Significance is invalid ()".format(significance), error=True))
+            return jsonify(dict(data={}, message="Significance is invalid ({})".format(significance), error=True))
     else:
         return jsonify(dict(data={}, message = "Your didn't enter first mean/var", error=True))
 
@@ -239,10 +240,9 @@ def check_cochrain():
         cochrain = utils.get_from_request_json(request.json, 'cochrain', 0)
         if utils.is_valid_cochrain(cochrain, USER.reproduce_res['cochrain']):
             USER.cochrain_status = 1
-            return jsonify(dict(data={}, message = 'Тут могла быть таблица для Кохрана, но её не завезли', error=False))
+            return jsonify(dict(data=COCHRAIN_TABLES[USER.cochrain_significance], message = '', error=False))
         else:
             return jsonify(dict(data={}, message = "Сochrain is invalid ({})".format(cochrain), error=True))
-        return jsonify(dict(data={}, message = '', error=False))
     else:   
         return jsonify(dict(data={}, message = "Your didn't set significance level", error=True))
 
@@ -252,9 +252,9 @@ def check_cochrain_freedom_degree():
     if USER.cochrain_status > 0: # when we reset it?
         df_numerator = utils.get_from_request_json(request.json, 'df_numerator', 0)
         df_denominator = utils.get_from_request_json(request.json, 'df_denominator', 0)
-        if not utils.is_valid_anything(df_numerator, USER.reproduce_res['cochrain']['df_numerator']):
+        if not utils.is_valid_int(df_numerator, USER.reproduce_res['cochrain']['df_numerator']):
             return jsonify(dict(data={}, message = "Numerator is invalid ({})".format(df_numerator), error=True))
-        if not utils.is_valid_anything(df_denominator, USER.reproduce_res['cochrain']['df_denominator']):
+        if not utils.is_valid_int(df_denominator, USER.reproduce_res['cochrain']['df_denominator']):
             return jsonify(dict(data={}, message = "Denominator is invalid ({})".format(df_denominator), error=True))
         USER.cochrain_status = 2
         return jsonify(dict(data={}, message = '', error=False))
@@ -292,12 +292,13 @@ def check_reproducible_var():
         reproducible_var = utils.get_from_request_json(request.json, 'reproducible_var')
         if not utils.is_valid_anything(reproducible_var, USER.reproduce_res['reproducibility_var']):
             return jsonify(dict(data={}, message = "Reproducible_var is invalid ({})".format(reproducible_var), error=True))
+        USER.state = UserState.estimate_parametrs
         return jsonify(dict(data={}, message = '', error=False))
     else:   
         return jsonify(dict(data={}, message = "Your didn't set is_reproducible", error=True))
 
 
-@bp.route('/get/reproducible_info', methods=['POST'])
+@bp.route('/get/reproducible_info', methods=['GET'])
 def get_reproducible_info():
     if USER.cochrain_status > 4:
         #USER.cochrain_status = 6
@@ -305,11 +306,157 @@ def get_reproducible_info():
             'level': USER.cochrain_significance,
             'prac_val': USER.reproduce_res['cochrain']['prac_value'],
             'crit_val': USER.reproduce_res['cochrain']['crit_value'],
-            'is_reproducible': USER.reproduce_res['cochrain']['is_reproducible'],
-            'reproducible_var': USER.reproduce_res['cochrain']['reproducible_var']
+            'is_reproducible': USER.reproduce_res['is_reproducible'].tolist(),
+            'reproducible_var': USER.reproduce_res['reproducibility_var'].tolist()
         }, message = '', error=False))
     else:   
         return jsonify(dict(data={}, message = "Your didn't set reproducible_var", error=True))
+
+
+@bp.route('/check/param_num', methods=['POST'])
+def check_param_num():
+    if USER.state >= UserState.estimate_parametrs:
+        param_num = utils.get_from_request_json(request.json, 'param_num')
+        if not utils.is_valid_param_num(param_num):
+            return jsonify(dict(data={}, message = "Param_num is invalid ({})".format(param_num), error=True))
+
+        USER.model.get_estimate_parameters()
+        USER.model_params = USER.model.get_model_params_info()
+
+        return jsonify(dict(data={}, message = '', error=False))
+
+
+@bp.route('/check/const_param', methods=['POST'])
+def check_const_param():
+    if USER.model_params:
+        const_param = utils.get_from_request_json(request.json, 'const_param')
+        if not utils.is_valid_anything(const_param, USER.model_params['model_params'][0]):
+            return jsonify(dict(data={}, message = "Const_param estimation is invalid ({})".format(const_param), error=True))
+
+        var_const_param = utils.get_from_request_json(request.json, 'var_const_param')
+        if not utils.is_valid_anything(var_const_param, USER.model_params['model_params_var']):
+            return jsonify(dict(data={}, message = "Const_param variance is invalid ({})".format(var_const_param), error=True))
+
+        USER.model_params['next_param'] = True
+        return jsonify(dict(data={}, message = '', error=False))
+
+
+@bp.route('/check/next_param', methods=['POST'])
+def check_next_param():
+    # DUBLICATE check_const_param
+    if USER.model_params and USER.model_params.get('next_param'):
+        const_param = utils.get_from_request_json(request.json, 'next_param')
+        if not utils.is_valid_anything(const_param, USER.model_params['model_params'][3]):
+            return jsonify(dict(data={}, message = "b12_param estimation is invalid ({})".format(const_param), error=True))
+
+        var_const_param = utils.get_from_request_json(request.json, 'var_b12_param')
+        if not utils.is_valid_anything(var_const_param, USER.model_params['model_params_var']):
+            return jsonify(dict(data={}, message = "b12_param variance is invalid ({})".format(var_const_param), error=True))
+        
+        USER.model_params['get_param'] = True
+        return jsonify(dict(data={}, message = '', error=False))
+
+
+@bp.route('/get/params', methods=['GET'])
+def get_param():
+    if USER.model_params and USER.model_params.get('get_param'):
+        return jsonify(dict(data={
+            'params': USER.model_params.get('model_params').tolist(),
+            'var': USER.model_params.get('model_params_var').tolist()
+        }, message = '', error=False))
+    else:
+        return jsonify(dict(data={}, message = "Params aren't set", error=True))
+
+
+@bp.route('/set/significance_level_student', methods=['POST'])
+def set_significance_level_student():
+    """
+    Check that params is set, and check reproducibility
+
+    error = True if params aren't set else False
+    """
+    if USER.model_params and USER.model_params.get('get_param'):
+        significance = utils.get_from_request_json(request.json, 'significance', 0)
+        if utils.is_valid_significance(significance):
+            USER.model_params['significance'] = significance
+            USER.model.check_params_significance(significance)
+            USER.model_params.update(USER.model.get_model_params_sing())    # add 'is_sign' and 'sign_coef'
+            return jsonify(dict(data={}, message = '', error=False))
+        else:
+            return jsonify(dict(data={}, message = "Significance is invalid ({})".format(significance), error=True))
+    else:
+        return jsonify(dict(data={}, message = "Your didn't enter params", error=True))
+
+
+@bp.route('/get/params_for_check', methods=['GET'])
+def get_params_for_check():
+    if USER.model_params and USER.model_params.get('significance'):
+        USER.model_params['params_for_check'] = utils.get_model_params_for_check((0,1,2,3), USER.model_params['is_sign'].tolist())
+        return jsonify(dict(data={'params': USER.model_params['params_for_check']}, message = '', error=False))
+    else:   
+        return jsonify(dict(data={}, message = "Your didn't set significance level", error=True))
+
+
+@bp.route('/check/params_for_check', methods=['POST'])
+def check_params_for_check():
+    if USER.model_params and USER.model_params.get('params_for_check'):
+        first_param = utils.get_from_request_json(request.json, 'first_param', 0)
+        if not utils.is_valid_anything(first_param, USER.model_params['student']['prac_value'][USER.model_params['params_for_check'][0]]):
+            return jsonify(dict(data={}, message = "first_param is invalid ({})".format(first_param), error=True))
+        
+        second_param = utils.get_from_request_json(request.json, 'second_param', 0)
+        if not utils.is_valid_anything(second_param, USER.model_params['student']['prac_value'][USER.model_params['params_for_check'][1]]):
+            return jsonify(dict(data={}, message = "second_param is invalid ({})".format(second_param), error=True))
+        
+        USER.model_params['is_param_checked'] = True
+        return jsonify(dict(data={}, message = '', error=False))
+    else:   
+        return jsonify(dict(data={}, message = "Your didn't /get/params_for_check", error=True))
+
+
+@bp.route('/get/student_table', methods=['GET'])
+def get_student_table():
+    if USER.model_params and USER.model_params.get('is_param_checked'):
+        return jsonify(dict(data=STUDENT_TABLE[USER.model_params['significance']], message = '', error=False))
+    else:   
+        return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
+
+
+@bp.route('/check/df_student', methods=['POST'])
+def check_df_student():
+    if USER.model_params and USER.model_params.get('is_param_checked'):
+        df_student = utils.get_from_request_json(request.json, 'df_student', 0)
+        if not utils.is_valid_int(df_student, USER.model_params['student']['df']):
+            return jsonify(dict(data={}, message = "df_student is invalid ({})".format(df_student), error=True))
+        USER.model_params['df_student_checked'] = True
+        return jsonify(dict(data={'prac': USER.model_params['student']['prac_value'].tolist(), 'crit_val': USER.model_params['student']['crit_value']}, message = '', error=False))
+    else:
+        return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
+
+
+@bp.route('/check/sign_param', methods=['POST'])
+def check_sign_param():
+    if USER.model_params and USER.model_params.get('df_student_checked'):
+        is_sign = utils.get_from_request_json(request.json, 'is_sign', None)
+        if is_sign != USER.model_params['is_sign'][0]:
+            return jsonify(dict(data={}, message = "sign_param is invalid ({})".format(sign_param), error=True))
+        USER.model_params['sign_param_checked'] = True
+        return jsonify(dict(data={}, message = '', error=False))
+    else:
+        return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
+
+
+@bp.route('/get/sign_params', methods=['GET'])
+def get_sign_params():
+    if USER.model_params and USER.model_params.get('df_student_checked'):
+        return jsonify(dict(data={
+            'params': USER.model_params['model_params'].tolist(),
+            'prac': USER.model_params['student']['prac_value'].tolist(),
+            'is_sign': USER.model_params['is_sign'].tolist()
+        }, message = '', error=False))
+    else:
+        return jsonify(dict(data={}, message = "Your didn't check sign_param", error=True))
+
 
 @bp.after_request
 def after_request(response):

@@ -64,17 +64,17 @@
                 <thead>
                   <tr>
                     <th rowspan="2">Точка ФП</th>
-                    <th :colspan="y_vals[0].length" align="center">Параллельные опыты</th>
+                    <th :colspan="res[0].length" align="center">Параллельные опыты</th>
                   </tr>
                   <tr>
-                    <th v-for="(n, j) in y_vals[0].length" :key="j">{{ j + 1 }}</th>
+                    <th v-for="(n, j) in res[0].length" :key="j">{{ j + 1 }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(n, i) in y_vals.length" :key="i">
+                  <tr v-for="(n, i) in res.length" :key="i">
                     <td>{{ i + 1 }}</td>
-                    <td v-for="(n, j) in y_vals[0].length" :key="j">
-                      {{ Number(y_vals[i][j].toFixed(2)) }}
+                    <td v-for="(n, j) in res[0].length" :key="j">
+                      {{ Number(res[i][j].toFixed(2)) }}
                     </td>
                   </tr>
                 </tbody>
@@ -236,6 +236,7 @@ export default {
         [10, 10],
       ],
       y_vals: [0, 0, 0],
+      res: [0, 0, 0],
       answer: "",
       number_of_saved_points: 0,
       alert_new_exp: false,
@@ -270,6 +271,21 @@ export default {
             this.y_vals[index] = Number(response.data.data.y.toFixed(2));
             this.$forceUpdate();
             document.getElementById("button_" + index).disabled = true;
+            if (index == 1) {
+              axios
+                .get(this.endpoints[1])
+                .then((response) => {
+                  if (response.data.error) {
+                    this.answer = response.data.data.message;
+                  } else {
+                    this.res = response.data.data.y_vals;
+                  }
+                })
+                .catch((error) => {
+                  console.log("-----error-------");
+                  console.log(error);
+                });
+            }
             setTimeout(function (e) {
               if (index == 0) {
                 document.getElementById("experiment_0").style.display = "none";
@@ -289,23 +305,9 @@ export default {
         });
     },
     show_results: function (e) {
-      axios
-        .get(this.endpoints[1])
-        .then((response) => {
-          if (response.data.error) {
-            this.answer = response.data.data.message;
-          } else {
-            this.y_vals = response.data.data.y_vals;
-            document.getElementById("show_res").disabled = true;
-          }
-          document.getElementById("factor_points").style.display = "none";
-          document.getElementById("results").style.display = "block";
-          this.$forceUpdate();
-        })
-        .catch((error) => {
-          console.log("-----error-------");
-          console.log(error);
-        });
+      if (document.getElementById("results").style.display === "none")
+        document.getElementById("results").style.display = "block";
+      else document.getElementById("results").style.display = "none";
     },
   },
 };

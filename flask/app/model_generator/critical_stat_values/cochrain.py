@@ -28,3 +28,17 @@ cochrain_05 = [
     [0.293, 0.198, 0.159, 0.138],
     [0.237, 0.158, 0.126, 0.108]
 ]
+
+COCHRAIN_TABLES = {0.01: 
+    {
+        'vals': cochrain_01,
+        'numerators': numerators,
+        'denominators': denominators
+    },
+    0.05: 
+    {
+        'vals': cochrain_05,
+        'numerators': numerators,
+        'denominators': denominators
+    }
+}

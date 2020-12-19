@@ -15,10 +15,11 @@ class APIUser:
     experiments_number: int = None
     model: FullFactorModel = None
     factor_point_index: int = 0
-    means_vars: int = 0
-    cochrain_significance: float = 0.0
-    reproduce_res: int = 0
+    means_vars: int = 0  # dict
+    reproduce_res: int = 0  # dict
+    cochrain_significance: float = None
     cochrain_status: int = 0
+    model_params: int = None  # dict
 
     def reset(self):
         self.state = UserState.start
@@ -32,7 +33,8 @@ class APIUser:
         self.factor_point_index = 0
         self.means_vars = {}
         self.reproduce_res = {}
-        self.cochrain_significance = 0
-        self.cochrain_status = 0
+        self.cochrain_significance = None
+        self.cochrain_status = None
+        self.model_params = {}
 
     def set_state(self, state): self.state = state
