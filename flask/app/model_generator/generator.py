@@ -332,6 +332,9 @@ class FullFactorModel:
     def get_model_params_sing(self):
         return {key: self.__results.get(key, None) for key in ('is_sign', 'sign_coef', 'student')}
 
+    def get_adequacy_info(self):
+        return {key: self.__results.get(key, None) for key in ('fisher', 'is_additional_experiment_conducted', 'is_adequacy', 'adequcy_var', 'df_adequacy_before_test', 'df_adequacy_after_test')}
+
 
 MODEL_TASKS = {
     '1': FullFactorModel.variant_1,
