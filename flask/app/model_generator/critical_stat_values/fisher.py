@@ -30,3 +30,17 @@ fisher_05 = [
     [ 3.92,  3.07, 2.68,  2.44,  2.17,  2.01,  1.90,  1.72,  1.65,  1.56],
     [ 3.84,  2.99, 2.60,  2.37,  2.09,  1.94,  1.83,  1.64,  1.57,  1.46]
 ]
+
+FISHER_TABLES = {0.01: 
+    {
+        'vals': fisher_01,
+        'numerators': numerators,
+        'denominators': denominators
+    },
+    0.05: 
+    {
+        'vals': fisher_05,
+        'numerators': numerators,
+        'denominators': denominators
+    }
+}
