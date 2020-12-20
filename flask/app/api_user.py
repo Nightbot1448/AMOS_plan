@@ -20,6 +20,7 @@ class APIUser:
     cochrain_significance: float = None
     cochrain_status: int = 0
     model_params: int = None  # dict
+    adequacy: int = None   # dict
 
     def reset(self):
         self.state = UserState.start
@@ -36,5 +37,6 @@ class APIUser:
         self.cochrain_significance = None
         self.cochrain_status = None
         self.model_params = {}
+        self.adequacy = {}
 
     def set_state(self, state): self.state = state
