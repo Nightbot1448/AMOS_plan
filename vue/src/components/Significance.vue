@@ -393,7 +393,7 @@ export default {
             this.param_values = response.data.data.params;
             this.sign_values = response.data.data.is_sign;
             if (answer == this.sign_values[index]){
-              this.sign_answer = "Правильно. Оценка параметра значима."
+              this.sign_answer = "Правильно."
               if (document.getElementById("sign_1").style.display == "block"){
                 document.getElementById("sign_1").style.display = "none";
                 document.getElementById("sign_2").style.display = "block";
