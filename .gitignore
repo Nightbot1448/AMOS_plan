@@ -1,3 +1,4 @@
 __pycache__/
 venv_plan
 node_modules/
+.vscode/

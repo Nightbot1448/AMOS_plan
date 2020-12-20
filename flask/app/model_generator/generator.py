@@ -291,6 +291,7 @@ class FullFactorModel:
 
     def adequacy_check(self, p_value = 0.01):
         'Адекватность. Критерий Фишера.'
+        df_adequacy = self.df_adequacy()
         prac_fisher_test = self.fisher_value()
 
         df_numerator = self.count_of_points - self.significant_coef.sum()\
@@ -306,6 +307,8 @@ class FullFactorModel:
                 'df_denominator': df_denominator,
                 'crit_value': fisher_crit_value,
             },
+            'df_adequacy_before_test': df_adequacy, 
+            'df_adequacy_after_test': self.df_adequacy(),
             'is_additional_experiment_conducted': self.additional_experiment_conducted,
             'is_adequacy': fisher_test_result,
             'adequcy_var': self.adequacy_var
