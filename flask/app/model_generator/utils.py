@@ -66,7 +66,7 @@ def is_valid_var(var, calc_var, max_diff_percent=0.01): return equal_float(var, 
 def is_valid_significance(significance): return significance in (0.01, 0.05)
 
 
-def is_valid_cochrain(cochrain, calc_cochrain, max_diff=0.025): return equal_float(cochrain, cochrain, max_diff, not_neg=True)
+def is_valid_cochrain(cochrain, calc_cochrain, max_diff=0.025): return equal_float(cochrain, calc_cochrain, max_diff, not_neg=True)
 
 
 def is_valid_anything(user, calc, max_diff_percent=0.01): return equal_float(user, calc, max_diff_percent)
