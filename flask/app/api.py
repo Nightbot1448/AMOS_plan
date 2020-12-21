@@ -8,6 +8,7 @@ from model_generator.userState import UserState
 from model_generator.generator import FullFactorModel
 from model_generator.critical_stat_values.cochrain import COCHRAIN_TABLES
 from model_generator.critical_stat_values.student import STUDENT_TABLE
+from model_generator.critical_stat_values.fisher import FISHER_TABLES
 from api_user import APIUser
 
 
@@ -238,7 +239,8 @@ def check_cochrain():
     """
     if USER.reproduce_res: # when we reset it?
         cochrain = utils.get_from_request_json(request.json, 'cochrain', 0)
-        if utils.is_valid_cochrain(cochrain, USER.reproduce_res['cochrain']):
+        print(USER.reproduce_res['cochrain']['prac_value'])
+        if utils.is_valid_cochrain(cochrain, USER.reproduce_res['cochrain']['prac_value']):
             USER.cochrain_status = 1
             return jsonify(dict(data=COCHRAIN_TABLES[USER.cochrain_significance], message = '', error=False))
         else:
@@ -439,8 +441,9 @@ def check_sign_param():
     if USER.model_params and USER.model_params.get('df_student_checked'):
         is_sign = utils.get_from_request_json(request.json, 'is_sign', None)
         if is_sign != USER.model_params['is_sign'][0]:
-            return jsonify(dict(data={}, message = "sign_param is invalid ({})".format(sign_param), error=True))
+            return jsonify(dict(data={}, message = "sign_param is invalid ({})".format(is_sign), error=True))
         USER.model_params['sign_param_checked'] = True
+
         return jsonify(dict(data={}, message = '', error=False))
     else:
         return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
@@ -449,6 +452,7 @@ def check_sign_param():
 @bp.route('/get/sign_params', methods=['GET'])
 def get_sign_params():
     if USER.model_params and USER.model_params.get('df_student_checked'):
+        USER.set_state(UserState.check_df_adequacy)
         return jsonify(dict(data={
             'params': USER.model_params['model_params'].tolist(),
             'prac': USER.model_params['student']['prac_value'].tolist(),
@@ -456,6 +460,100 @@ def get_sign_params():
         }, message = '', error=False))
     else:
         return jsonify(dict(data={}, message = "Your didn't check sign_param", error=True))
+
+
+@bp.route('/set/significance_level_fisher', methods=['POST'])
+def set_significance_level_fisher():
+    """
+    Check that we can go to adequacy and set level
+
+    error = True if can't go to adequacy else False
+    """
+    if USER.state >= UserState.check_df_adequacy:
+        significance = utils.get_from_request_json(request.json, 'significance', 0)
+        if utils.is_valid_significance(significance):
+            df_model_adeq = USER.model.df_adequacy()
+            
+            USER.model.adequacy_check(significance) # доп эксперимент проведется тут автоматически
+            USER.adequacy = USER.model.get_adequacy_info()
+            USER.adequacy['significance'] = significance
+            if df_model_adeq:
+                return jsonify(dict(
+                    data={'df_adequacy_before_test': int(USER.adequacy['df_adequacy_before_test']), 'df_adequacy_after_test': int(USER.adequacy['df_adequacy_after_test'])},
+                    message = 'Число степеней свободы дисперсии адекватности = {}. Поздравляем, доп. эксперимент не нужен'.format(df_model_adeq), error=False))
+            else:
+                return jsonify(dict(
+                    data={'df_adequacy_before_test': int(USER.adequacy['df_adequacy_before_test']), 'df_adequacy_after_test': int(USER.adequacy['df_adequacy_after_test'])},
+                    message = 'Число степеней свободы дисперсии адекватности = {}. Нужен доп. эксперимент, но его пока не завезли (мы провели его сами)'.format(df_model_adeq), error=False))
+        else:
+            return jsonify(dict(data={}, message = "Significance is invalid ({})".format(significance), error=True))
+    else:
+        return jsonify(dict(data={}, message = "Вы ещё не готовы к проверке адекватности", error=True))
+
+
+@bp.route('/check/adequacy_var', methods=['POST'])
+def check_adequacy_var():
+    if USER.adequacy:
+        adequacy_var = utils.get_from_request_json(request.json, 'adequacy_var', -1)
+        if utils.is_valid_anything(adequacy_var, USER.adequacy['adequcy_var']):
+            USER.adequacy['adequacy_var_checked'] = True
+            return jsonify(dict(data={}, message = '', error=False))
+        else:
+            return jsonify(dict(data={}, message = "Значение дисперсии адекватности неверное ({})".format(adequacy_var), error=True))
+    else:
+        return jsonify(dict(data={}, message = "Вы ещё не готовы к проверке дисперсии адекватности", error=True))
+
+
+@bp.route('/check/prac_fisher', methods=['POST'])
+def check_prac_fisher():
+    if USER.adequacy and USER.adequacy.get('adequacy_var_checked'):
+        prac_fisher = utils.get_from_request_json(request.json, 'prac_fisher', -1)
+        if utils.is_valid_anything(prac_fisher, USER.adequacy['fisher']['prac_value']):
+            USER.adequacy['prac_fisher_checked'] = True
+            return jsonify(dict(data={}, message = '', error=False))
+        else:
+            return jsonify(dict(data={}, message = "Практическое значение критерия Фишера неверное ({})".format(prac_fisher), error=True))
+    else:
+        return jsonify(dict(data={}, message = "Вы ещё не готовы к проверке значения критерия Фишера", error=True))
+
+
+@bp.route('/get/fisher_table', methods=['GET'])
+def get_fisher_table():
+    if USER.adequacy.get('significance'):
+        return jsonify(dict(data=FISHER_TABLES[USER.adequacy['significance']], message = '', error=False))
+    else:
+        return jsonify(dict(data={}, message = "Не установлен уровень значимости для критерия Фишера", error=True))
+
+
+@bp.route('/check/fisher_freedom_degree', methods=['POST'])
+def check_fisher_freedom_degree():
+    if USER.adequacy and USER.adequacy.get('prac_fisher_checked'):
+        df_numerator = utils.get_from_request_json(request.json, 'df_numerator', 0)
+        df_denominator = utils.get_from_request_json(request.json, 'df_denominator', 0)
+        if not utils.is_valid_int(df_numerator, USER.adequacy['fisher']['df_numerator']):
+            return jsonify(dict(data={}, message = "Numerator is invalid ({})".format(df_numerator), error=True))
+        if not utils.is_valid_int(df_denominator, USER.adequacy['fisher']['df_denominator']):
+            return jsonify(dict(data={}, message = "Denominator is invalid ({})".format(df_denominator), error=True))
+        USER.adequacy['df_checked'] = True
+        return jsonify(dict(data=
+            {
+                'crit_value': USER.adequacy['fisher']['crit_value'],
+                'prac_value': USER.adequacy['fisher']['prac_value']
+            }, message = '', error=False))
+    else:
+        return jsonify(dict(data={}, message = "Вы ещё не готовы к проверке степеней свободы критерия Фишера", error=True))
+
+
+@bp.route('/check/is_adequacy', methods=['POST'])
+def check_is_adequacy():
+    if USER.adequacy and USER.adequacy.get('df_checked'):
+        is_adequacy = utils.get_from_request_json(request.json, 'is_adequacy')
+        if is_adequacy == USER.adequacy['is_adequacy']:
+            return jsonify(dict(data={}, message = 'Поздравляем, работа закончена', error=False))
+        else:
+            return jsonify(dict(data={}, message = "Неверно!", error=True))
+    else:
+        return jsonify(dict(data={}, message = "Вы ещё не готовы к проверке адекватности", error=True))
 
 
 @bp.after_request

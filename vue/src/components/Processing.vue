@@ -14,6 +14,10 @@
         <b-list-group-item to="/significance"
           >Значимость оценок (Критерий Стьюдента)</b-list-group-item
         >
+        <b-list-group-item><b>Адекватность:</b></b-list-group-item>
+        <b-list-group-item to="/adequacy"
+          >Адекватность модели (Критерий Фишера)</b-list-group-item
+        >
       </b-list-group>
     </div>
     <div class="documentation">

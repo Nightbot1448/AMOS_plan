@@ -11,6 +11,7 @@ import Mean_Var from '@/components/Mean_Var';
 import Reproducibility from '@/components/Reproducibility';
 import Parameter_estimation from '@/components/Parameter_estimation';
 import Significance from '@/components/Significance';
+import Adequacy from '@/components/Adequacy';
 
 Vue.use(Router);
 
@@ -70,6 +71,11 @@ export default new Router({
       path: '/significance',
       name: 'Significance',
       component: Significance,
+    },
+    {
+      path: '/adequacy',
+      name: 'Adequacy',
+      component: Adequacy,
     },
   ],
 });
