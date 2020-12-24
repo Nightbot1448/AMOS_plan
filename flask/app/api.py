@@ -195,6 +195,8 @@ def check_mean_var():
         USER.means_vars = dict(means=means.tolist(), vars=vars.tolist())
         USER.state = UserState.reproduciblility
         return jsonify(dict(data={}, message = '', error=False))
+    else:
+        return jsonify(dict(data={}, message = 'Вы не готовы к проверке среднего и вариации факторов', error=True))
 
 
 @bp.route('/get/means_vars', methods=['GET'])
