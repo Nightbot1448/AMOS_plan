@@ -39,14 +39,14 @@ def check_task():
 @bp.route('/check/planning_area', methods=['POST'])
 def check_planning_area():
     """
-    Validate and set planning_area
+    Проверяет и устанавливает область планирования
 
-    error = True if planning_area is invalid else False
+    error = True если область планирования указана неверно
     """
     USER.set_state(UserState.init_completed)
     
     if not USER.task:
-        return jsonify(dict(data={}, message="Task_id isn't set", error=True))
+        return jsonify(dict(data={}, message="Не выбран вариант!", error=True))
 
     planning_area = utils.get_from_request_json(request.json, 'pa_points', [])
     valid_planning_area = utils.is_valid_planning_area(planning_area)
@@ -54,7 +54,7 @@ def check_planning_area():
    
     return jsonify({
         'data': {},
-        'message': '' if valid_planning_area else 'Invalid planning area {}'.format(planning_area),
+        'message': '' if valid_planning_area else 'Неверная область планирования! {}'.format(planning_area),
         'error': not valid_planning_area        
     })
 
@@ -62,14 +62,14 @@ def check_planning_area():
 @bp.route('/check/plan_points_number', methods=['POST'])
 def check_plan_points_number():
     """
-    Validate and set plan_points_number
+    Проверяет и устанавливает количество точек планирования
 
-    error = True if plan_points_number is invalid else False
+    error = True если количество точек планирования неверно (должно быть 4)
     """
     USER.set_state(UserState.init_completed)
     
     if not USER.planning_area:
-        return jsonify(dict(data={}, message="Planning_area isn't set", error=True))
+        return jsonify(dict(data={}, message="Область планирования не установлена!", error=True))
 
     plan_points_number = utils.get_from_request_json(request.json, 'plan_points_number', 0)
     valid_plan_points_number = utils.is_valid_plan_points_number(plan_points_number)
@@ -77,7 +77,7 @@ def check_plan_points_number():
    
     return jsonify({
         'data': {},
-        'message': '' if valid_plan_points_number else 'Invalid plan_points_number {}'.format(plan_points_number),
+        'message': '' if valid_plan_points_number else 'Неверное количество точек планирования! {}'.format(plan_points_number),
         'error': not valid_plan_points_number        
     })
 
@@ -85,9 +85,9 @@ def check_plan_points_number():
 @bp.route('/check/plan_points_and_number_experiment', methods=['POST'])
 def check_plan_points():
     """
-    Validate and set plan_points and number_experiment
+    Проверяет и устанавливает точки планирования и количество параллельных опытов
 
-    error = True if plan_points or number_experiment is invalid else False
+    error = True если точки планирования/количество параллельных опытов неверные
     """
     def reset():
         USER.plan_points = None
@@ -132,25 +132,28 @@ def check_plan_points():
 @bp.route('/check/factor_point', methods=['POST'])
 def check_factor_point():
     """
-    Validate factor_point and return y_vals[i]
+    Проверяет значения факторов и возвращает i-ое значение
 
-    error = True if factor_point is invalid else False
+    error = True если занчения факторов неверное
     """
     USER.set_state(UserState.init_completed)
     
     if USER.plan_points is None:
-        return jsonify(dict(data={}, message="Plan_points and number_experiment aren't set", error=True))
+        return jsonify(dict(data={}, message="Точки планирования и количечтсво параллельныъ экспериментов не установлены", error=True))
 
     factor_point = utils.get_from_request_json(request.json, 'factor_point', [])
     valid_factor_point, index = utils.is_valid_factor_point(factor_point, USER.planning_area, USER.plan_points[0])
     if not valid_factor_point:
         return jsonify({
             'data': {},
-            'message': '' if valid_factor_point else 'Invalid point {} for factor X{}'.format(factor_point[index], index+1),
+            'message': '' if valid_factor_point else 'Неверная точка {} для фактора factor X{}'.format(factor_point[index], index+1),
             'error': not valid_factor_point        
         })
 
     y_val = USER.model.y_vals[0][USER.factor_point_index]
+    means, vars = USER.model.points_mean_var()
+    print(means[0])
+    print(vars[0])
     USER.factor_point_index += 1
     USER.set_state(UserState.main_experiment if USER.factor_point_index == 2 else UserState.init_completed)
     USER.factor_point_index %= 2
@@ -160,23 +163,23 @@ def check_factor_point():
 @bp.route('/get/factor_points', methods=['GET'])
 def get_factor_points():
     """
-    Check that user entered first factor_points, and return y_vals[i]
+    Проверяет что пользователь ввел первые значения факторов и возвращает все значения
 
-    error = True if first factor_points don't exist
+    error = True если первые значения факторов не введены
     """
     if USER.state >= UserState.main_experiment: # or == ?
         USER.state = UserState.mean_var
         return jsonify(dict(data={'y_vals': USER.model.y_vals.tolist()}, message = '', error=False))
     else:
-        return jsonify(dict(data={}, message = "Your didn't enter first factor_points", error=True))
+        return jsonify(dict(data={}, message = "Вы не ввели первые значения факторов", error=True))
 
 
 @bp.route('/check/mean_var', methods=['POST'])
 def check_mean_var():
     """
-    Validate mean and var for first point factor
-
-    error = True if mean/var is invalid else False
+    Проверяет среднее и дисперсию отклика в первой точке
+    
+    error = True если среднее/дисперсия неверны
     """
     if USER.state >= UserState.mean_var: # or == ?
         means, vars = USER.model.points_mean_var()
@@ -187,10 +190,14 @@ def check_mean_var():
         print(means[0])
         print(vars[0])
 
+        message = ''
         if not utils.is_valid_mean(mean, means[0]):
-            return jsonify(dict(data={}, message = "Mean is invalid ({})".format(mean), error=True))
+            message += "Среднее неверно ({})\n".format(mean)
         if not utils.is_valid_var(var,vars[0]):
-            return jsonify(dict(data={}, message = "Var is invalid ({})".format(var), error=True))
+            message += "Дисперсия неверна ({})".format(var)
+
+        if message:
+            return jsonify(dict(data={}, message=message, error=True))
         
         USER.means_vars = dict(means=means.tolist(), vars=vars.tolist())
         USER.state = UserState.reproduciblility
@@ -202,22 +209,23 @@ def check_mean_var():
 @bp.route('/get/means_vars', methods=['GET'])
 def get_means_vars():
     """
+    Проверя что пользователь ввел среднее/дисперсию в первой точке и возвращает все значения средних/дисперсий 
     Check that user entered first mean/var, and return points_mean_var
 
-    error = True if first mean/var don't entered
+    error = True если среднее/дисперсия в первой точке не введены
     """
     if USER.means_vars: # when we reset it?
         return jsonify(dict(data={'means': USER.means_vars['means'], 'vars': USER.means_vars['vars']}, message = '', error=False))
     else:
-        return jsonify(dict(data={}, message = "Your didn't enter first mean/var", error=True))
+        return jsonify(dict(data={}, message = "Вы не ввели среднее/дисперсию в первой точке", error=True))
 
 
 @bp.route('/set/significance_level', methods=['POST'])
 def set_significance_level():
     """
-    Check that means_vars is set, and check reproducibility
+    Проверяет верность уровня и делает проверку воспроизводимости
 
-    error = True if means_vars isn't set else False
+    error = True если предыдущие шаги не выполнены
     """
     if USER.means_vars: # when we reset it?
         significance = utils.get_from_request_json(request.json, 'significance', 0)
@@ -227,17 +235,17 @@ def set_significance_level():
             USER.reproduce_res = USER.model.get_reproducibility_info()
             return jsonify(dict(data={'sum_var': sum(USER.means_vars['vars'])}, message = '', error=False))
         else:
-            return jsonify(dict(data={}, message="Significance is invalid ({})".format(significance), error=True))
+            return jsonify(dict(data={}, message="Уровень значимости неверный ({})".format(significance), error=True))
     else:
-        return jsonify(dict(data={}, message = "Your didn't enter first mean/var", error=True))
+        return jsonify(dict(data={}, message = "Вы не ввели среднее/дисперсию в первой точке", error=True))
 
 
 @bp.route('/check/cochrain', methods=['POST'])
 def check_cochrain():
     """
-    Validate cochrain and get table
+    Проверяет практическое значение критерия Кохрена и возвращает таблицу значений 
 
-    error = True if cochrain is invalid else False
+    error = True если практическое значение неверно
     """
     if USER.reproduce_res: # when we reset it?
         cochrain = utils.get_from_request_json(request.json, 'cochrain', 0)
@@ -246,9 +254,9 @@ def check_cochrain():
             USER.cochrain_status = 1
             return jsonify(dict(data=COCHRAIN_TABLES[USER.cochrain_significance], message = '', error=False))
         else:
-            return jsonify(dict(data={}, message = "Сochrain is invalid ({})".format(cochrain), error=True))
+            return jsonify(dict(data={}, message = "Практическое значение критерия Кохрена неверно ({})".format(cochrain), error=True))
     else:   
-        return jsonify(dict(data={}, message = "Your didn't set significance level", error=True))
+        return jsonify(dict(data={}, message = "Вы не установили уровень знамичости", error=True))
 
 
 @bp.route('/check/cochrain_freedom_degree', methods=['POST'])
@@ -256,14 +264,20 @@ def check_cochrain_freedom_degree():
     if USER.cochrain_status > 0: # when we reset it?
         df_numerator = utils.get_from_request_json(request.json, 'df_numerator', 0)
         df_denominator = utils.get_from_request_json(request.json, 'df_denominator', 0)
+        
+        message = ''
         if not utils.is_valid_int(df_numerator, USER.reproduce_res['cochrain']['df_numerator']):
-            return jsonify(dict(data={}, message = "Numerator is invalid ({})".format(df_numerator), error=True))
+            message += "Число степеней свободы числителя неверно ({})\n".format(df_numerator)
         if not utils.is_valid_int(df_denominator, USER.reproduce_res['cochrain']['df_denominator']):
-            return jsonify(dict(data={}, message = "Denominator is invalid ({})".format(df_denominator), error=True))
+            message += "Число степеней свободы знаменателя неверно ({})".format(df_denominator)
+
+        if message:
+            return jsonify(dict(data={}, message=message, error=True))
+        
         USER.cochrain_status = 2
         return jsonify(dict(data={}, message = '', error=False))
     else:   
-        return jsonify(dict(data={}, message = "Your didn't set cochrain", error=True))
+        return jsonify(dict(data={}, message = "Вы не установили значение критерия Кохрена", error=True))
 
 
 @bp.route('/get/cochrain', methods=['GET'])
@@ -273,7 +287,7 @@ def get_cochrain():
         return jsonify(dict(data={'prac_cochrain': USER.reproduce_res['cochrain']['prac_value'],
             'crit_cochrain': USER.reproduce_res['cochrain']['crit_value']}, message = '', error=False))
     else:   
-        return jsonify(dict(data={}, message = "Your didn't set freedom degrees", error=True))
+        return jsonify(dict(data={}, message = "Вы не указали число степеней свободы", error=True))
 
 
 @bp.route('/check/is_reproducible', methods=['POST'])
@@ -284,9 +298,9 @@ def check_reproducible():
         if is_reproducible == USER.reproduce_res['is_reproducible']:
             return jsonify(dict(data={}, message = '', error=False))
         else:
-            return jsonify(dict(data={}, message = "is_reproducible is invalid ({})".format(is_reproducible), error=True))
+            return jsonify(dict(data={}, message = "Ошибаетесь! ({})".format(is_reproducible), error=True))
     else:   
-        return jsonify(dict(data={}, message = "Your didn't /get/cochrain", error=True))
+        return jsonify(dict(data={}, message = "Получите таблицу значений критерия Кохрена", error=True))
 
 
 @bp.route('/check/reproducible_var', methods=['POST'])
@@ -295,11 +309,11 @@ def check_reproducible_var():
         USER.cochrain_status = 5
         reproducible_var = utils.get_from_request_json(request.json, 'reproducible_var')
         if not utils.is_valid_anything(reproducible_var, USER.reproduce_res['reproducibility_var']):
-            return jsonify(dict(data={}, message = "Reproducible_var is invalid ({})".format(reproducible_var), error=True))
+            return jsonify(dict(data={}, message = "Дисперсия воспроизводимости неверная ({})".format(reproducible_var), error=True))
         USER.state = UserState.estimate_parametrs
         return jsonify(dict(data={}, message = '', error=False))
     else:   
-        return jsonify(dict(data={}, message = "Your didn't set is_reproducible", error=True))
+        return jsonify(dict(data={}, message = "Вы не ответили на вопрос о воспроизводимости эксперимента", error=True))
 
 
 @bp.route('/get/reproducible_info', methods=['GET'])
@@ -314,7 +328,7 @@ def get_reproducible_info():
             'reproducible_var': USER.reproduce_res['reproducibility_var'].tolist()
         }, message = '', error=False))
     else:   
-        return jsonify(dict(data={}, message = "Your didn't set reproducible_var", error=True))
+        return jsonify(dict(data={}, message = "Вы не проверили дисперсию воспроизмодимости!", error=True))
 
 
 @bp.route('/check/param_num', methods=['POST'])
@@ -322,7 +336,7 @@ def check_param_num():
     if USER.state >= UserState.estimate_parametrs:
         param_num = utils.get_from_request_json(request.json, 'param_num')
         if not utils.is_valid_param_num(param_num):
-            return jsonify(dict(data={}, message = "Param_num is invalid ({})".format(param_num), error=True))
+            return jsonify(dict(data={}, message = "Количество параметров модели неверное! ({})".format(param_num), error=True))
 
         USER.model.get_estimate_parameters()
         USER.model_params = USER.model.get_model_params_info()
@@ -334,12 +348,16 @@ def check_param_num():
 def check_const_param():
     if USER.model_params:
         const_param = utils.get_from_request_json(request.json, 'const_param')
-        if not utils.is_valid_anything(const_param, USER.model_params['model_params'][0]):
-            return jsonify(dict(data={}, message = "Const_param estimation is invalid ({})".format(const_param), error=True))
-
         var_const_param = utils.get_from_request_json(request.json, 'var_const_param')
+
+        message = ''
+        if not utils.is_valid_anything(const_param, USER.model_params['model_params'][0]):
+            message += "Оценка постоянного параметра неверная! ({})\n".format(const_param)
         if not utils.is_valid_anything(var_const_param, USER.model_params['model_params_var']):
-            return jsonify(dict(data={}, message = "Const_param variance is invalid ({})".format(var_const_param), error=True))
+            message += "Дисперсия постоянного параметра неверная! ({})".format(var_const_param)
+
+        if message:
+            return jsonify(dict(data={}, message=message, error=True))
 
         USER.model_params['next_param'] = True
         return jsonify(dict(data={}, message = '', error=False))
@@ -350,13 +368,17 @@ def check_next_param():
     # DUBLICATE check_const_param
     if USER.model_params and USER.model_params.get('next_param'):
         const_param = utils.get_from_request_json(request.json, 'next_param')
-        if not utils.is_valid_anything(const_param, USER.model_params['model_params'][3]):
-            return jsonify(dict(data={}, message = "b12_param estimation is invalid ({})".format(const_param), error=True))
-
         var_const_param = utils.get_from_request_json(request.json, 'var_b12_param')
+        message = ''
+        if not utils.is_valid_anything(const_param, USER.model_params['model_params'][3]):
+            message += "Оценка постоянного параметра неверная! ({})\n".format(const_param)
         if not utils.is_valid_anything(var_const_param, USER.model_params['model_params_var']):
-            return jsonify(dict(data={}, message = "b12_param variance is invalid ({})".format(var_const_param), error=True))
-        
+            message += "Дисперсия постоянного параметра неверная! ({})".format(var_const_param)
+
+        if message:
+            return jsonify(dict(data={}, message=message, error=True))
+
+
         USER.model_params['get_param'] = True
         return jsonify(dict(data={}, message = '', error=False))
 
@@ -369,15 +391,13 @@ def get_param():
             'var': USER.model_params.get('model_params_var').tolist()
         }, message = '', error=False))
     else:
-        return jsonify(dict(data={}, message = "Params aren't set", error=True))
+        return jsonify(dict(data={}, message = "Значения параметров не установлены!", error=True))
 
 
 @bp.route('/set/significance_level_student', methods=['POST'])
 def set_significance_level_student():
     """
-    Check that params is set, and check reproducibility
-
-    error = True if params aren't set else False
+    Проверка значимости параметров
     """
     if USER.model_params and USER.model_params.get('get_param'):
         significance = utils.get_from_request_json(request.json, 'significance', 0)
@@ -387,9 +407,9 @@ def set_significance_level_student():
             USER.model_params.update(USER.model.get_model_params_sing())    # add 'is_sign' and 'sign_coef'
             return jsonify(dict(data={}, message = '', error=False))
         else:
-            return jsonify(dict(data={}, message = "Significance is invalid ({})".format(significance), error=True))
+            return jsonify(dict(data={}, message = "Уровень значимости неверен! ({})".format(significance), error=True))
     else:
-        return jsonify(dict(data={}, message = "Your didn't enter params", error=True))
+        return jsonify(dict(data={}, message = "Вы не ввели значения параметров!", error=True))
 
 
 @bp.route('/get/params_for_check', methods=['GET'])
@@ -398,24 +418,28 @@ def get_params_for_check():
         USER.model_params['params_for_check'] = utils.get_model_params_for_check((0,1,2,3), USER.model_params['is_sign'].tolist())
         return jsonify(dict(data={'params': USER.model_params['params_for_check']}, message = '', error=False))
     else:   
-        return jsonify(dict(data={}, message = "Your didn't set significance level", error=True))
+        return jsonify(dict(data={}, message = "Вы не установили уровень значимости!", error=True))
 
 
 @bp.route('/check/params_for_check', methods=['POST'])
 def check_params_for_check():
     if USER.model_params and USER.model_params.get('params_for_check'):
         first_param = utils.get_from_request_json(request.json, 'first_param', 0)
-        if not utils.is_valid_anything(first_param, USER.model_params['student']['prac_value'][USER.model_params['params_for_check'][0]]):
-            return jsonify(dict(data={}, message = "first_param is invalid ({})".format(first_param), error=True))
-        
         second_param = utils.get_from_request_json(request.json, 'second_param', 0)
+
+        message = ''
+        if not utils.is_valid_anything(first_param, USER.model_params['student']['prac_value'][USER.model_params['params_for_check'][0]]):
+            message += "Первый параметр неверен ({})\n".format(first_param)
         if not utils.is_valid_anything(second_param, USER.model_params['student']['prac_value'][USER.model_params['params_for_check'][1]]):
-            return jsonify(dict(data={}, message = "second_param is invalid ({})".format(second_param), error=True))
-        
+            message += "Второй параметр неверен ({})".format(second_param)
+
+        if message:
+            return jsonify(dict(data={}, message=message, error=True))
+
         USER.model_params['is_param_checked'] = True
         return jsonify(dict(data={}, message = '', error=False))
     else:   
-        return jsonify(dict(data={}, message = "Your didn't /get/params_for_check", error=True))
+        return jsonify(dict(data={}, message = "Вы не получили индексы параметров для проверки", error=True))
 
 
 @bp.route('/get/student_table', methods=['GET'])
@@ -423,7 +447,7 @@ def get_student_table():
     if USER.model_params and USER.model_params.get('is_param_checked'):
         return jsonify(dict(data=STUDENT_TABLE[USER.model_params['significance']], message = '', error=False))
     else:   
-        return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
+        return jsonify(dict(data={}, message = "Вы не проверили параметры модели", error=True))
 
 
 @bp.route('/check/df_student', methods=['POST'])
@@ -431,11 +455,11 @@ def check_df_student():
     if USER.model_params and USER.model_params.get('is_param_checked'):
         df_student = utils.get_from_request_json(request.json, 'df_student', 0)
         if not utils.is_valid_int(df_student, USER.model_params['student']['df']):
-            return jsonify(dict(data={}, message = "df_student is invalid ({})".format(df_student), error=True))
+            return jsonify(dict(data={}, message = "Число степеней свободы критерия Стьюдента неверное ({})".format(df_student), error=True))
         USER.model_params['df_student_checked'] = True
         return jsonify(dict(data={'prac': USER.model_params['student']['prac_value'].tolist(), 'crit_val': USER.model_params['student']['crit_value']}, message = '', error=False))
     else:
-        return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
+        return jsonify(dict(data={}, message = "Вы не проверили параметры модели", error=True))
 
 
 @bp.route('/check/sign_param', methods=['POST'])
@@ -443,12 +467,12 @@ def check_sign_param():
     if USER.model_params and USER.model_params.get('df_student_checked'):
         is_sign = utils.get_from_request_json(request.json, 'is_sign', None)
         if is_sign != USER.model_params['is_sign'][0]:
-            return jsonify(dict(data={}, message = "sign_param is invalid ({})".format(is_sign), error=True))
+            return jsonify(dict(data={}, message = "Указанная значимость неверна! ({})".format(is_sign), error=True))
         USER.model_params['sign_param_checked'] = True
 
         return jsonify(dict(data={}, message = '', error=False))
     else:
-        return jsonify(dict(data={}, message = "Your didn't check model_params", error=True))
+        return jsonify(dict(data={}, message = "Вы не проверили параметры модели", error=True))
 
 
 @bp.route('/get/sign_params', methods=['GET'])
@@ -574,10 +598,16 @@ def check_fisher_freedom_degree():
     if USER.adequacy and USER.adequacy.get('prac_fisher_checked'):
         df_numerator = utils.get_from_request_json(request.json, 'df_numerator', 0)
         df_denominator = utils.get_from_request_json(request.json, 'df_denominator', 0)
+
+        message = ''
         if not utils.is_valid_int(df_numerator, USER.adequacy['fisher']['df_numerator']):
-            return jsonify(dict(data={}, message = "Numerator is invalid ({})".format(df_numerator), error=True))
+            message += "Число степеней свободы числителя неверно ({})\n".format(df_numerator)
         if not utils.is_valid_int(df_denominator, USER.adequacy['fisher']['df_denominator']):
-            return jsonify(dict(data={}, message = "Denominator is invalid ({})".format(df_denominator), error=True))
+            message += "Число степеней свободы знаменателя неверно ({})".format(df_denominator)
+
+        if message:
+            return jsonify(dict(data={}, message=message, error=True))
+
         USER.adequacy['df_checked'] = True
         return jsonify(dict(data=
             {
