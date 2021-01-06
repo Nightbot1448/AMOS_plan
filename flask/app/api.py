@@ -461,7 +461,49 @@ def get_sign_params():
             'is_sign': USER.model_params['is_sign'].tolist()
         }, message = '', error=False))
     else:
-        return jsonify(dict(data={}, message = "Your didn't check sign_param", error=True))
+        return jsonify(dict(data={}, message = "Вы не проверили значимость параметров!", error=True))
+
+
+## additional experiment
+
+@bp.route('/check/need_additional_experiment', methods=['POST'])
+def check_need_additional_experiment():
+    if USER.state >= UserState.check_df_adequacy:
+        if USER.model.df_adequacy():
+            USER.set_state(UserState.additional_completed)
+            return jsonify(dict(data={'is_additional_experiment_needed': False},
+                message = "Дополнительный эксперимент не требуется! Число степеней свободы дисперсии адекватности = {}".format(USER.model.df_adequacy()),
+                error=False))
+        else:
+            USER.set_state(UserState.additional_started)
+            return jsonify(dict(data={'is_additional_experiment_needed': True},
+                message = "Нужен дополнительный эксперимент! Число степеней свободы дисперсии адекватности = {}. Доп. эксперимент проводится в центре области планирования".format(USER.model.df_adequacy()),
+                error=False))
+    else:
+        return jsonify(dict(data={}, message = "Вы не проверили значимость параметров!", error=True))
+
+
+@bp.route('/check/additional_experiment_point', methods=['POST'])
+def check_additional_experiment_area():
+    if USER.state == UserState.additional_started:
+        exp_point = utils.get_from_request_json(request.json, 'additional_experiment_point', (-999999, -999999))
+        X1, X2 = USER.planning_area[0][0], USER.planning_area[1][0]
+        message = ''
+        if not utils.is_valid_anything(X1, exp_point[0]):
+            message += 'Значение X1 неверное! ({})\n'.format(exp_point[0])
+        if not utils.is_valid_anything(X2, exp_point[1]):
+            message += 'Значение X2 неверное! ({})'.format(exp_point[1])
+        
+        if not message:
+            USER.model.additional_experiment()
+            USER.set_state(UserState.additional_completed)
+            additional_experiment = USER.model.y_vals[-1]
+            return jsonify(dict(data={'y': additional_experiment, 'y_vals': USER.model.y_vals.tolist()}, message = '', error=False))
+        else:
+            return jsonify(dict(data={}, message = message, error=True))
+    else:
+        return jsonify(dict(data={}, message = "Дополнительный эксперимент не требуется, либо вы зашли сюда слишком рано!", error=True))
+##
 
 
 @bp.route('/set/significance_level_fisher', methods=['POST'])
@@ -471,12 +513,12 @@ def set_significance_level_fisher():
 
     error = True if can't go to adequacy else False
     """
-    if USER.state >= UserState.check_df_adequacy:
+    if USER.state >= UserState.additional_completed:
         significance = utils.get_from_request_json(request.json, 'significance', 0)
         if utils.is_valid_significance(significance):
             df_model_adeq = USER.model.df_adequacy()
             
-            USER.model.adequacy_check(significance) # доп эксперимент проведется тут автоматически
+            USER.model.adequacy_check(significance)
             USER.adequacy = USER.model.get_adequacy_info()
             USER.adequacy['significance'] = significance
             if df_model_adeq:
@@ -486,11 +528,11 @@ def set_significance_level_fisher():
             else:
                 return jsonify(dict(
                     data={'df_adequacy_before_test': int(USER.adequacy['df_adequacy_before_test']), 'df_adequacy_after_test': int(USER.adequacy['df_adequacy_after_test'])},
-                    message = 'Число степеней свободы дисперсии адекватности = {}. Нужен доп. эксперимент, но его пока не завезли (мы провели его сами)'.format(df_model_adeq), error=False))
+                    message = 'Число степеней свободы дисперсии адекватности = {}. Нужно провести доп. эксперимент'.format(df_model_adeq), error=False))
         else:
             return jsonify(dict(data={}, message = "Significance is invalid ({})".format(significance), error=True))
     else:
-        return jsonify(dict(data={}, message = "Вы ещё не готовы к проверке адекватности", error=True))
+        return jsonify(dict(data={}, message = "Вы ещё не готовы к проверке адекватности! Проверьте, нужен ли вам дополнительный эксперимент?", error=True))
 
 
 @bp.route('/check/adequacy_var', methods=['POST'])
