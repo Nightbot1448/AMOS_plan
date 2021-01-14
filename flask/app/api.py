@@ -522,7 +522,7 @@ def check_additional_experiment_area():
             USER.model.additional_experiment()
             USER.set_state(UserState.additional_completed)
             additional_experiment = USER.model.y_vals[-1]
-            return jsonify(dict(data={'y': additional_experiment, 'y_vals': USER.model.y_vals.tolist()}, message = '', error=False))
+            return jsonify(dict(data={'y': additional_experiment.tolist(), 'y_vals': USER.model.y_vals.tolist()}, message = '', error=False))
         else:
             return jsonify(dict(data={}, message = message, error=True))
     else:
