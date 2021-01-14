@@ -5,6 +5,7 @@
         <b-col cols="2"></b-col>
         <b-col cols="8" align="center">
           <b-card class="mb-2 mt-2">
+            <h2>Планирование</h2>
             <div id="set_points_number">
               <label for="number_of_points"
                 >Сколько точек должно быть в спектре плана?</label

@@ -6,6 +6,7 @@
         <b-col cols="8" align="center">
           <b-card class="mb-2 mt-2">
             <div id="significance">
+              <h2>Проверка воспроизводимости</h2>
               <label for="significance">Уровень значимости</label>
               <b-form-select id="significance" v-model.number="significance" type="number">
                 <option>0.01</option>
