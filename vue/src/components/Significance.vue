@@ -113,7 +113,7 @@
             {{ sign_wrong }}</b-alert
           >
           <div class="mb-5 mt-5">
-            <b-button variant="secondary" to="/adequacy">Далее</b-button>
+            <b-button variant="secondary" to="/addexp">Далее</b-button>
           </div>
         </b-col>
       </b-row>

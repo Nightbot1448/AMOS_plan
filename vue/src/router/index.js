@@ -12,6 +12,7 @@ import Reproducibility from '@/components/Reproducibility';
 import Parameter_estimation from '@/components/Parameter_estimation';
 import Significance from '@/components/Significance';
 import Adequacy from '@/components/Adequacy';
+import Addexp from '@/components/Addexp';
 
 Vue.use(Router);
 
@@ -76,6 +77,11 @@ export default new Router({
       path: '/adequacy',
       name: 'Adequacy',
       component: Adequacy,
+    },
+    {
+      path: '/addexp',
+      name: 'Addexp',
+      component: Addexp,
     },
   ],
 });
