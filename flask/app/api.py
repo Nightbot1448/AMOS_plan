@@ -403,8 +403,9 @@ def set_significance_level_student():
         significance = utils.get_from_request_json(request.json, 'significance', 0)
         if utils.is_valid_significance(significance):
             USER.model_params['significance'] = significance
-            USER.model.check_params_significance(significance)
-            USER.model_params.update(USER.model.get_model_params_sing())    # add 'is_sign' and 'sign_coef'
+            if 'is_sign' not in USER.model_params.keys():
+                USER.model.check_params_significance(significance)
+                USER.model_params.update(USER.model.get_model_params_sing())    # add 'is_sign' and 'sign_coef'
             return jsonify(dict(data={}, message = '', error=False))
         else:
             return jsonify(dict(data={}, message = "Уровень значимости неверен! ({})".format(significance), error=True))
