@@ -12,6 +12,7 @@ import Reproducibility from '@/components/Reproducibility';
 import Parameter_estimation from '@/components/Parameter_estimation';
 import Significance from '@/components/Significance';
 import Adequacy from '@/components/Adequacy';
+import Docs from '@/components/Docs';
 
 Vue.use(Router);
 
@@ -77,6 +78,11 @@ export default new Router({
       name: 'Adequacy',
       component: Adequacy,
     },
+    {
+      path: '/help',
+      name: 'Docs',
+      component: Docs,
+    }
   ],
 });
 

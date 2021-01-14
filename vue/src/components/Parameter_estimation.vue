@@ -166,13 +166,13 @@
             <table class="table table-bordered">
               <thead>
                 <tr>
-                  <td rowspan="2">Точка плана</td>
-                  <td colspan="3">Сущ. переменные</td>
+                  <th rowspan="2">Точка плана</th>
+                  <th colspan="3">Сущ. переменные</th>
                 </tr>
                 <tr>
-                  <td>X1</td>
-                  <td>X2</td>
-                  <td>X1*X2</td>
+                  <th>X1</th>
+                  <th>X2</th>
+                  <th>X1*X2</th>
                 </tr>
               </thead>
               <tbody>
