@@ -13,6 +13,7 @@ import Parameter_estimation from '@/components/Parameter_estimation';
 import Significance from '@/components/Significance';
 import Adequacy from '@/components/Adequacy';
 import Addexp from '@/components/Addexp';
+import Experiment_menu from '@/components/Experiment_menu';
 
 Vue.use(Router);
 
@@ -82,6 +83,11 @@ export default new Router({
       path: '/addexp',
       name: 'Addexp',
       component: Addexp,
+    },
+    {
+      path: '/experiment_menu',
+      name: 'Experiment_menu',
+      component: Experiment_menu,
     },
   ],
 });
