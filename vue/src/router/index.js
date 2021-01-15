@@ -14,6 +14,7 @@ import Significance from '@/components/Significance';
 import Adequacy from '@/components/Adequacy';
 import Addexp from '@/components/Addexp';
 import Experiment_menu from '@/components/Experiment_menu';
+import Docs from '@/components/Docs';
 
 Vue.use(Router);
 
@@ -89,6 +90,11 @@ export default new Router({
       name: 'Experiment_menu',
       component: Experiment_menu,
     },
+    {
+      path: '/help',
+      name: 'Docs',
+      component: Docs,
+    }
   ],
 });
 
