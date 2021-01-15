@@ -38,7 +38,7 @@
               >
                     </b-col>
                 </b-row>
-              <p id="y_value" style="display: none">Результат: {{ y[-1] }} </p>
+              <p id="y_value" style="display: none">Результат: {{ Number(y_mean.toFixed(2)) }} </p>
             </div>
           </b-card>
           <b-alert class="mt-2" variant="danger" :show="needed_answer ? true : false">
@@ -67,8 +67,8 @@ export default {
       needed_answer: "",
       factor_1: 0,
       factor_2: 0,
-      y: 0,
-      y_vals: 0,
+      y_mean: 0,
+      y_vals: [],
       point_answer: "",
       endpoints: [
         "http://127.0.0.1:5000/api/check/need_additional_experiment",
@@ -113,7 +113,11 @@ export default {
         })
         .then((response) => {
           if (!response.data.error) {
-            this.y = response.data.data.y;
+            let y = response.data.data.y;
+            let total = 0;
+            for (let i=0; i < y.length; i++)
+              total+=y[i];
+            this.y_mean = total/y.length;
             this.y_vals = response.data.data.y_vals;
             document.getElementById("y_value").style.display = 'block';
             document.getElementById("send_point").disabled = true;
