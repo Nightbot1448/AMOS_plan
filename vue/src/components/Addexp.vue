@@ -38,7 +38,7 @@
               >
                     </b-col>
                 </b-row>
-              <p id="y_value" style="display: none">Результат: {{ y }} </p>
+              <p id="y_value" style="display: none">Результат: {{ y[-1] }} </p>
             </div>
           </b-card>
           <b-alert class="mt-2" variant="danger" :show="needed_answer ? true : false">
