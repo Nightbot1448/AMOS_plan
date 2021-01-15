@@ -5,6 +5,7 @@
         <b-col cols="1"></b-col>
         <b-col cols="9" align="center">
           <b-card class="mb-2 mt-2">
+            <h2>Адекватность модели</h2>
             <div id="significance">
               <label for="significance">Уровень значимости</label>
               <b-form-select id="significance" v-model.number="significance" type="number">

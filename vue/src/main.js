@@ -13,7 +13,10 @@ import Planning from './components/Planning.vue';
 import Conduct from './components/Conduct.vue';
 import Processing from './components/Processing.vue';
 import Adequacy from './components/Adequacy.vue';
+import Addexp from './components/Addexp.vue';
+import Experiment_menu from './components/Experiment_menu.vue';
 import Docs from './components/Docs.vue';
+
 import { store } from './store'
 
 Vue.config.productionTip = false;
@@ -26,7 +29,8 @@ new Vue({
   router,
   components: { App, Preparation, 
     Task, PlanningArea,  Planning,
-    Conduct, Processing, Adequacy, Docs},
+    Conduct, Processing, Adequacy, 
+    Addexp, Experiment_menu, Docs},
   template: '<App/>',
   store: store
 });

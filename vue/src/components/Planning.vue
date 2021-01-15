@@ -5,6 +5,7 @@
         <b-col cols="2"></b-col>
         <b-col cols="8" align="center">
           <b-card class="mb-2 mt-2">
+            <h2>Планирование</h2>
             <div id="set_points_number">
               <label for="number_of_points"
                 >Сколько точек должно быть в спектре плана?</label
@@ -36,7 +37,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(n, index) in number_of_points" :key="index">
+                  <tr v-for="(n, index) in indexes" :key="index">
                     <th scope="row">Точка {{ index + 1 }}</th>
                     <td>
                       <b-form-input
@@ -67,9 +68,9 @@
           <b-alert class="mt-2" variant="success" :show="answer ? true : false">{{
             answer
           }}</b-alert>
-          <b-alert class="mt-2" variant="danger" :show="error ? true : false">{{
-            error
-          }}</b-alert>
+          <b-alert class="mt-2" variant="danger" :show="error ? true : false">
+            {{ error }}</b-alert
+          >
           <b-alert class="mt-2" variant="success" :show="answer2 ? true : false">{{
             answer2
           }}</b-alert>
@@ -159,6 +160,7 @@ export default {
       answer2: "",
       error2: "",
       number_of_points: 4,
+      indexes: 4,
       points: [
         [1, 1],
         [-1, 1],
@@ -178,10 +180,11 @@ export default {
           },
         })
         .then((response) => {
-          if (response.data.message === "") {
+          if (!response.data.error) {
             this.answer = "Количество точек в спектре плана указано верно.";
             document.getElementById("check_num_points").disabled = true;
             document.getElementById("spinner_check").style.display = "block";
+            this.indexes = this.number_of_points;
             setTimeout(function (e) {
               document.getElementById("set_points_number").style.display = "none";
               document.getElementById("set_points").style.display = "block";

@@ -10,5 +10,6 @@ class UserState(IntEnum):
     sign_of_coefs = 6
     check_df_adequacy = 7
     adequacy = 8
-    additional_completed = 9
-    adequacy_with_additional_completed = 10
+    additional_started = 9
+    additional_completed = 10
+    adequacy_with_additional_completed = 11

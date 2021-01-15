@@ -6,6 +6,7 @@
         <b-col cols="8" align="center">
           <b-card class="mb-2 mt-2">
             <div id="factor_points">
+              <h2>Проведение эксперимента</h2>
               <div id="experiment_0">
                 <h3>Опыт 1</h3>
                 <b-container>

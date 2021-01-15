@@ -5,7 +5,7 @@
       <div>
         <b-nav tabs fill>
           <b-nav-item to="/preparation" exact-active-class>Подготовка</b-nav-item>
-          <b-nav-item to="/experiment" exact-active-class>Проведение</b-nav-item>
+          <b-nav-item to="/experiment_menu" exact-active-class>Проведение</b-nav-item>
           <b-nav-item to="/processing" exact-active-class>Обработка</b-nav-item>
           <b-nav-item to="/help" exact-active-class>Справка</b-nav-item>
         </b-nav>

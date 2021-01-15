@@ -5,6 +5,7 @@
         <b-col cols="2"></b-col>
         <b-col cols="8" align="center">
           <b-card class="mb-2 mt-2">
+            <h2>Значимость оценок</h2>
             <div id="significance">
               <label for="significance">Уровень значимости</label>
               <b-form-select id="significance" v-model.number="significance" type="number">
@@ -14,12 +15,9 @@
               <b-button @click="send_significance" variant="primary" class="mt-4" id="send_sign">Сохранить</b-button>
             </div>
             <div id="param_1" style="display: none">
-              <label for="param_1">Наблюдаемое значение критерия Стьюдента для {{ params[0] }}:</label>
+              <label for="param_1">Наблюдаемое значение критерия Стьюдента для <b>{{ params[0] }}</b></label>
               <b-form-input v-model.number="param_1" type="number" />
-              <b-button @click="display_param_2" variant="primary" class="mt-4" id="param_1_btn">Проверить</b-button>
-            </div>
-            <div id="param_2" style="display: none">
-              <label for="param_2">Наблюдаемое значение критерия Стьюдента для {{ params[1] }}:</label>
+              <label for="param_2">Наблюдаемое значение критерия Стьюдента для <b>{{ params[1] }}</b></label>
               <b-form-input v-model.number="param_2" type="number" />
               <b-button @click="send_params" variant="primary" class="mt-4" id="param_2_btn">Проверить</b-button>
             </div>
@@ -65,14 +63,14 @@
             <div id="sign_1" style="display: none">
               <p>Наблюдаемое значение критерия: {{ prac_values[params_index[0]] ? Number(prac_values[params_index[0]].toFixed(2)): prac_values[params_index[0]] }}</p>
               <p>Критическое значение критерия: {{ crit_value }}</p>
-              <p>Оценка параметра {{ params[0] }} значима?</p>
+              <p>Оценка параметра <b>{{ params[0] }}</b> значима?</p>
               <b-button @click="is_sign(true, params_index[0])" variant="primary">Да</b-button>
               <b-button @click="is_sign(false, params_index[0])" variant="primary">Нет</b-button>
             </div>
             <div id="sign_2" style="display: none">
               <p>Наблюдаемое значение критерия: {{ prac_values[params_index[1]] ? Number(prac_values[params_index[1]].toFixed(2)): prac_values[params_index[1]] }}</p>
               <p>Критическое значение критерия: {{ crit_value }}</p>
-              <p>Оценка параметра {{ params[1] }} значима?</p>
+              <p>Оценка параметра <b>{{ params[1] }}</b> значима?</p>
               <b-button @click="is_sign(true, params_index[1])" variant="primary">Да</b-button>
               <b-button @click="is_sign(false, params_index[1])" variant="primary">Нет</b-button>
             </div>
@@ -113,7 +111,7 @@
             {{ sign_wrong }}</b-alert
           >
           <div class="mb-5 mt-5">
-            <b-button variant="secondary" to="/adequacy">Далее</b-button>
+            <b-button variant="secondary" to="/addexp">Далее</b-button>
           </div>
         </b-col>
       </b-row>
@@ -323,10 +321,6 @@ export default {
           console.log(error);
         });
     },
-    display_param_2: function (e) {
-            document.getElementById("param_1").style.display = "none";
-            document.getElementById("param_2").style.display = "block";
-    },
     send_params: function (e) {
       axios
         .post(this.endpoints[2], { data: { 
@@ -334,9 +328,7 @@ export default {
           second_param: this.param_2, } })
         .then((response) => {
           if (!response.data.error) {
-            document.getElementById("param_1_btn").disabled = true;
             document.getElementById("param_1").style.display = "none";
-            document.getElementById("param_2").style.display = "none";
             axios
             .get(this.endpoints[3])
             .then((response) => {
@@ -356,7 +348,6 @@ export default {
             this.param_answer = response.data.message
             if (response.data.message.indexOf("first_param") != -1){
               document.getElementById("param_1").style.display = "block";
-              document.getElementById("param_1_btn").style.display = "none";
 
             }
           }
