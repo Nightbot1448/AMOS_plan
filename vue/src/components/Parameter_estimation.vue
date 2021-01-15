@@ -5,8 +5,8 @@
         <b-col cols="2"></b-col>
         <b-col cols="8" align="center">
           <b-card class="mb-2 mt-2">
+            <h2>Оценка параметров</h2>
             <div id="set_parameters_num">
-              <h2>Оценка параметров</h2>
               <label for="params_num">Сколько параметров содержит модель?</label>
               <b-form-input v-model.number="params_num" type="number" />
               <b-button id="send_params_num" @click="send_params_num()" class="mt-4" variant="primary">Сохранить</b-button>
