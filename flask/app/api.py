@@ -633,5 +633,5 @@ def check_is_adequacy():
 
 @bp.after_request
 def after_request(response):
-    print(USER)
+    # print(USER)
     return response
