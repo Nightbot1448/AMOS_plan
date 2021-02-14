@@ -110,7 +110,6 @@ class FullFactorModel:
             (normalized_points[:,0] * normalized_points[:,1])[:, np.newaxis]
         ))
 
-        # TODO центрирование и нормирование 
         # points = np.ones((2**count_of_factors, count_of_factors))
         self.variant = generate_variant
         self.variant(self)

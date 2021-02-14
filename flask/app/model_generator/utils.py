@@ -16,7 +16,6 @@ def is_valid_task_id(task_id): return bool(get_model_by_task_id(task_id))
 
 
 def is_valid_planning_area(planning_area, max_diff=100):
-    #TODO: test
     check_flag = True
     for factor in planning_area:
         if len(factor) != 2: return False
